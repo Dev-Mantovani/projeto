@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom"
 import api from "../../services/api"
 
 
+
 import {
  Container,
   Form, Containerinput,
-  InputLabel, Input,
+  InputLabel, Input
 } from "./styles"
 
 
@@ -14,6 +15,11 @@ import {
 import Button from "../../components/Button"
 import TopBackground from "../../components/TopBackground"
 import Title from "../../components/Title"
+import Sidebar from "../../components/Sidebar"
+
+
+
+
 
 
 function Home() {
@@ -39,11 +45,13 @@ function Home() {
 
   return (
     <Container>
+      <Sidebar></Sidebar>
       <TopBackground />
-
+    
       <Form>
-
+       
         <Title>Cadastrar Usuário</Title>
+    
         <Containerinput>
 
           <div>
