@@ -57,9 +57,8 @@ const Home: React.FC = () => {
   return (
     <Container>
       <Sidebar />
-      <TopBackground />
-      
       <Form>
+        <TopBackground />
         <Title>Cadastrar Usuário</Title>
         
         <Containerinput>
