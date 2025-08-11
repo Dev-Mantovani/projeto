@@ -4,7 +4,11 @@ import { User, CreateUserData } from "../types/User";
 
 // Criamos o cliente axios
 const api = axios.create({
-  baseURL: 'http://localhost:3000'
+  baseURL: 'http://localhost:3000',
+ timeout: 5000, // Adicione um timeout
+  headers: {
+    'Content-Type': 'application/json',
+  }
 });
 
 // Agora criamos funções específicas para cada operação
@@ -30,8 +34,20 @@ export const userApi = {
   updateUser: async (id: number, userData: Partial<CreateUserData>): Promise<User> => {
     const { data } = await api.put(`/usuarios/${id}`, userData);
     return data;
-  }
+  },
+
+  login: async (usuario: string, senha: string) => {
+    const { data } = await api.post('/login', { usuario, senha });
+    return data;
+  },
+
+
+
 };
+
+
+
+
 
 // Exportamos também o api original para compatibilidade
 export default api;

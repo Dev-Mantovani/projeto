@@ -21,7 +21,7 @@ const Sidebar: React.FC = () => {
   return (
     <Sidebar_container $isClicked={clicked}>      
 <Div_button>
-  <Title_sidebar> Gestão RH</Title_sidebar>
+  <Title_sidebar>Gestão RH</Title_sidebar>
     {menuItems.map(({ label, icon: Icon }, index) => (
       <Div_menu key={index}>
             <Icon_menu as={Icon} />

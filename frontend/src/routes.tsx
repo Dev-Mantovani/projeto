@@ -2,6 +2,7 @@ import {createBrowserRouter} from 'react-router-dom'
 import Home from './pages/Home'
 import ListUsers from './pages/ListUsers'
 import Funcionarios from './pages/Funcionarios'
+import Login from './pages/Acess'
 
 
 
@@ -25,6 +26,15 @@ const router = createBrowserRouter([
 
 
     },
+
+     {
+        path: '/login',
+        element: <Login/>
+
+
+    },
+
+    
 
 
 ]
