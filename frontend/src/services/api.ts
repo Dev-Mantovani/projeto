@@ -59,6 +59,7 @@ export const dashboardApi = {
     return data;
   },
 
+  
   // ---- Produtos ----
   getProdutos: async () => {
     const { data } = await api.get("/produtos");
@@ -66,6 +67,15 @@ export const dashboardApi = {
   },
   createProduto: async (payload: any) => {
     const { data } = await api.post("/produtos", payload);
+    return data;
+  },
+
+  updateProduto: async (id: number, payload: any) => {
+    const { data } = await api.put(`/produtos/${id}`, payload);
+    return data;
+  },
+  deleteProduto: async (id: number) => {
+    const { data } = await api.delete(`/produtos/${id}`);
     return data;
   },
 
@@ -78,6 +88,16 @@ export const dashboardApi = {
     const { data } = await api.post("/departamentos", payload);
     return data;
   },
+
+  updateDepartamento: async (id: number, payload: any) => {
+    const { data } = await api.put(`/departamentos/${id}`, payload);
+    return data;
+  },
+  deleteDepartamento: async (id: number) => {
+    const { data } = await api.delete(`/departamentos/${id}`);
+    return data;
+  },
+
 };
 
 

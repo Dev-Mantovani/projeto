@@ -63,19 +63,22 @@ app.get("/dados-consolidados", async (req, res) => {
 
 // POST
 app.post("/dados-consolidados", async (req, res) => {
-  const { filial, previsto_per_capita, numero_serventes, previsto_total_ctr, realizado_per_capita, acumulado_total, diferenca, variacao, status } = req.body;
-  const { data, error } = await supabase.from("dados_consolidados").insert([{ filial, previsto_per_capita, numero_serventes, previsto_total_ctr, realizado_per_capita, acumulado_total, diferenca, variacao, status }]).single();
+  const { cadastro_filial, previsto_per_capita, numero_serventes, previsto_total_ctr, realizado_per_capita, acumulado_total, diferenca, variacao, status } = req.body;
+  const { data, error } = await supabase.from("dados_consolidados").insert([{ cadastro_filial, previsto_per_capita, numero_serventes, previsto_total_ctr, realizado_per_capita, acumulado_total, diferenca, variacao, status }]).single();
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json(data);
 });
 
 // -------------------- Produtos --------------------
+
+// Rota para listar os produtos 
 app.get("/produtos", async (req, res) => {
   const { data, error } = await supabase.from("produtos").select("*");
   if (error) return res.status(500).json({ error: error.message });
   res.status(200).json(data);
 });
 
+// Rota para cadastrar os produtos 
 app.post("/produtos", async (req, res) => {
   const { codigo, conta_financeira, descricao } = req.body;
   const { data, error } = await supabase.from("produtos").insert([{ codigo, conta_financeira, descricao }]).single();
@@ -83,13 +86,37 @@ app.post("/produtos", async (req, res) => {
   res.status(201).json(data);
 });
 
-// -------------------- Departamentos --------------------
-app.get("/departamentos", async (req, res) => {
-  const { data, error } = await supabase.from("departamentos").select("*");
+// Rota para update os produtos
+app.put("/produtos/:id", async (req, res) => {
+  const { id } = req.params;
+  const { codigo, conta_financeira, descricao } = req.body;
+  
+  const { data, error } = await supabase
+    .from("produtos")
+    .update({ codigo, conta_financeira, descricao })
+    .eq("id", id)
+    .single();
+
   if (error) return res.status(500).json({ error: error.message });
-  res.status(200).json(data);
+  res.json(data);
 });
 
+// Rota para deletar os produtos
+app.delete("/produtos/:id", async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from("produtos")
+    .delete()
+    .eq("id", id);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+
+
+// -------------------- Departamentos --------------------
+// Rota para cadastrar departamento
 app.post("/departamentos", async (req, res) => {
   const { cadastro_filial, cadastro_departamento, numero_serventes, previsto_total_ctr } = req.body;
   const { data, error } = await supabase.from("departamentos").insert([{ cadastro_filial, cadastro_departamento, numero_serventes, previsto_total_ctr }]).single();
@@ -103,6 +130,34 @@ app.get("/departamentos", async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
 
+  res.json(data);
+});
+
+
+// Rota para Update no Departamento
+app.put("/departamentos/:id", async (req, res) => {
+  const { id } = req.params;
+  const { cadastro_filial, cadastro_departamento, numero_serventes, previsto_total_ctr } = req.body;
+  
+  const { data, error } = await supabase
+    .from("departamentos")
+    .update({ cadastro_filial, cadastro_departamento, numero_serventes, previsto_total_ctr })
+    .eq("id", id)
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// Rota para Delete no Departamento
+app.delete("/departamentos/:id", async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from("departamentos")
+    .delete()
+    .eq("id", id);
+
+  if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
