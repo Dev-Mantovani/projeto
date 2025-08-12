@@ -1,135 +1,114 @@
-import express from "express";
-import cors from "cors";
-import { createClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
-import bcrypt from "bcrypt";
+import express from "express"
+import cors from "cors"
+import { createClient } from "@supabase/supabase-js"
+import dotenv from "dotenv"
 
-dotenv.config();
+dotenv.config()
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+const app = express()
+app.use(express.json())
+app.use(cors())
 
 // GET - Buscar usuários
-app.get("/usuarios", async (req, res) => {
-  const { data, error } = await supabase.from("users").select("*");
+app.get('/usuarios', async (req, res) => {
+  const { data, error } = await supabase.from('users').select('*')
 
+  if (error) return res.status(500).json({ error: error.message })
+  res.status(200).json(data)
+})
+
+// POST - Criar usuário
+app.post('/usuarios', async (req, res) => {
+  const { email, name, age } = req.body
+
+  const { data, error } = await supabase.from('users').insert([{ email, name, age }]).single()
+
+  if (error) return res.status(500).json({ error: error.message })
+  res.status(201).json(data)
+})
+
+// PUT - Atualizar usuário
+app.put('/usuarios/:id', async (req, res) => {
+  const { id } = req.params
+  const { email, name, age } = req.body
+
+  const { data, error } = await supabase.from('users').update({ email, name, age }).eq('id', id).single()
+
+  if (error) return res.status(500).json({ error: error.message })
+  res.status(200).json(data)
+})
+
+// DELETE - Remover usuário
+app.delete('/usuarios/:id', async (req, res) => {
+  const { id } = req.params
+
+  const { error } = await supabase.from('users').delete().eq('id', id)
+
+  if (error) return res.status(500).json({ error: error.message })
+  res.status(200).json({ message: "Usuário deletado com sucesso" })
+})
+
+
+
+
+// -------------------- Dados Consolidados --------------------
+// GET
+app.get("/dados-consolidados", async (req, res) => {
+  const { data, error } = await supabase.from("dados_consolidados").select("*");
   if (error) return res.status(500).json({ error: error.message });
   res.status(200).json(data);
 });
 
-// POST - Criar usuário com senha criptografada
-app.post("/usuarios", async (req, res) => {
-  const { login, senha, name, email, age } = req.body;
-
-  if (!login || !senha) {
-    return res.status(400).json({ error: "Login e senha são obrigatórios" });
-  }
-
-  // Criptografar senha
-  const hashedPassword = await bcrypt.hash(senha, 10);
-
-  const { data, error } = await supabase
-    .from("users")
-    .insert([{ login, senha: hashedPassword, name, email, age }])
-    .single();
-
+// POST
+app.post("/dados-consolidados", async (req, res) => {
+  const { filial, previsto_per_capita, numero_serventes, previsto_total_ctr, realizado_per_capita, acumulado_total, diferenca, variacao, status } = req.body;
+  const { data, error } = await supabase.from("dados_consolidados").insert([{ filial, previsto_per_capita, numero_serventes, previsto_total_ctr, realizado_per_capita, acumulado_total, diferenca, variacao, status }]).single();
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json(data);
 });
 
-// PUT - Atualizar usuário
-app.put("/usuarios/:id", async (req, res) => {
-  const { id } = req.params;
-  const { login, senha, name, email, age } = req.body;
-
-  let updatedData = { login, name, email, age };
-
-  if (senha) {
-    updatedData.senha = await bcrypt.hash(senha, 10);
-  }
-
-  const { data, error } = await supabase
-    .from("users")
-    .update(updatedData)
-    .eq("id", id)
-    .single();
-
+// -------------------- Produtos --------------------
+app.get("/produtos", async (req, res) => {
+  const { data, error } = await supabase.from("produtos").select("*");
   if (error) return res.status(500).json({ error: error.message });
   res.status(200).json(data);
 });
 
-// DELETE - Remover usuário
-app.delete("/usuarios/:id", async (req, res) => {
-  const { id } = req.params;
-
-  const { error } = await supabase.from("users").delete().eq("id", id);
-
+app.post("/produtos", async (req, res) => {
+  const { codigo, conta_financeira, descricao } = req.body;
+  const { data, error } = await supabase.from("produtos").insert([{ codigo, conta_financeira, descricao }]).single();
   if (error) return res.status(500).json({ error: error.message });
-  res.status(200).json({ message: "Usuário deletado com sucesso" });
+  res.status(201).json(data);
 });
 
+// -------------------- Departamentos --------------------
+app.get("/departamentos", async (req, res) => {
+  const { data, error } = await supabase.from("departamentos").select("*");
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(200).json(data);
+});
 
+app.post("/departamentos", async (req, res) => {
+  const { cadastro_filial, cadastro_departamento, numero_serventes, previsto_total_ctr } = req.body;
+  const { data, error } = await supabase.from("departamentos").insert([{ cadastro_filial, cadastro_departamento, numero_serventes, previsto_total_ctr }]).single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(201).json(data);
+});
 
-// LOGIN
+// Rota para listar departamentos
+app.get("/departamentos", async (req, res) => {
+  const { data, error } = await supabase.from("departamentos").select("*");
 
+  if (error) return res.status(500).json({ error: error.message });
 
-// Altere todas as referências no seu backend
-app.post("/login", async (req, res) => {
-  const { login, senha } = req.body;
-
-  try {
-    // 1. Busca o usuário na tabela "acess"
-    const { data: usuario, error } = await supabase
-      .from("acess")
-      .select("*")
-      .eq("login", login)
-      .single();
-
-    if (error || !usuario) {
-      console.log('Usuário não encontrado:', login);
-      return res.status(401).json({ 
-        sucesso: false,
-        erro: "Credenciais inválidas" 
-      });
-    }
-
-    // 2. Verifica a senha (comparação direta pois não estamos usando hash neste exemplo)
-    // Em produção, você deve usar bcrypt como no seu exemplo original
-    const senhaValida = senha === usuario.senha;
-    // Para usar bcrypt: const senhaValida = await bcrypt.compare(senha, usuario.senha);
-    
-    if (!senhaValida) {
-      console.log('Senha inválida para usuário:', login);
-      return res.status(401).json({
-        sucesso: false,
-        erro: "Credenciais inválidas"
-      });
-    }
-
-    // 3. Remove a senha do objeto de retorno
-    const { senha: _, ...dadosUsuario } = usuario;
-    
-    console.log('Login bem-sucedido para:', login);
-    res.json({
-      sucesso: true,
-      usuario: dadosUsuario
-    });
-
-  } catch (erro) {
-    console.error('Erro no processo de login:', erro);
-    res.status(500).json({
-      sucesso: false,
-      erro: "Erro interno no servidor"
-    });
-  }
+  res.json(data);
 });
 
 
 
 // Start server
 app.listen(3000, () => {
-  console.log("Servidor rodando na porta 3000");
-});
+  console.log("Servidor rodando na porta 3000")
+})

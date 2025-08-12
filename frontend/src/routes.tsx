@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import ListUsers from './pages/ListUsers'
 import Funcionarios from './pages/Funcionarios'
 import Login from './pages/Acess'
+import Dashboard from './pages/Administration'
 
 
 
@@ -33,6 +34,14 @@ const router = createBrowserRouter([
 
 
     },
+
+      {
+        path: '/administration',
+        element: <Dashboard/>
+
+
+    },
+
 
     
 

@@ -36,14 +36,51 @@ export const userApi = {
     return data;
   },
 
+
+
+    /// LOGIN
   login: async (usuario: string, senha: string) => {
     const { data } = await api.post('/login', { usuario, senha });
     return data;
   },
 
 
-
 };
+
+
+export const dashboardApi = {
+  // ---- Dados Consolidados ----
+  getDadosConsolidados: async () => {
+    const { data } = await api.get("/dados-consolidados");
+    return data;
+  },
+  createDadoConsolidado: async (payload: any) => {
+    const { data } = await api.post("/dados-consolidados", payload);
+    return data;
+  },
+
+  // ---- Produtos ----
+  getProdutos: async () => {
+    const { data } = await api.get("/produtos");
+    return data;
+  },
+  createProduto: async (payload: any) => {
+    const { data } = await api.post("/produtos", payload);
+    return data;
+  },
+
+  // ---- Departamentos ----
+  getDepartamentos: async () => {
+    const { data } = await api.get("/departamentos");
+    return data;
+  },
+  createDepartamento: async (payload: any) => {
+    const { data } = await api.post("/departamentos", payload);
+    return data;
+  },
+};
+
+
 
 
 
