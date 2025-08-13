@@ -381,6 +381,7 @@ export const Table = styled.table`
   tbody tr {
     &:hover {
       background: #f1f8e9;
+      cursor: pointer;
     }
 
     &:last-child td {
@@ -677,6 +678,40 @@ export const DepartmentCard = styled(Card)`
     gap: 10px;
     justify-content: flex-end;
   }
+
+.department-products {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    
+    h4 {
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #555;
+    }
+    
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 10px 0;
+      
+      li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 0;
+        border-bottom: 1px dashed #eee;
+      }
+    }
+    
+    select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+  }
+  
 `;
 
 export const IconButton = styled.button`
@@ -853,3 +888,5 @@ export const FloatingActionButton = styled.button`
     justify-content: center;
   }
 `;
+
+

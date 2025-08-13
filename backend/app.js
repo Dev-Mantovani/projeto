@@ -118,8 +118,8 @@ app.delete("/produtos/:id", async (req, res) => {
 // -------------------- Departamentos --------------------
 // Rota para cadastrar departamento
 app.post("/departamentos", async (req, res) => {
-  const { cadastro_filial, cadastro_departamento, numero_serventes, previsto_total_ctr } = req.body;
-  const { data, error } = await supabase.from("departamentos").insert([{ cadastro_filial, cadastro_departamento, numero_serventes, previsto_total_ctr }]).single();
+  const { cadastro_filial, cadastro_departamento,tipo_departamento, numero_serventes, previsto_total_ctr } = req.body;
+  const { data, error } = await supabase.from("departamentos").insert([{ cadastro_filial, cadastro_departamento,tipo_departamento, numero_serventes, previsto_total_ctr }]).single();
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json(data);
 });
@@ -137,11 +137,11 @@ app.get("/departamentos", async (req, res) => {
 // Rota para Update no Departamento
 app.put("/departamentos/:id", async (req, res) => {
   const { id } = req.params;
-  const { cadastro_filial, cadastro_departamento, numero_serventes, previsto_total_ctr } = req.body;
+  const { cadastro_filial, cadastro_departamento, numero_serventes,tipo_departamento, previsto_total_ctr } = req.body;
   
   const { data, error } = await supabase
     .from("departamentos")
-    .update({ cadastro_filial, cadastro_departamento, numero_serventes, previsto_total_ctr })
+    .update({ cadastro_filial, cadastro_departamento,tipo_departamento, numero_serventes, previsto_total_ctr })
     .eq("id", id)
     .single();
 

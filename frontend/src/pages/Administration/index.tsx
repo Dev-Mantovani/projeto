@@ -34,6 +34,7 @@ import {
 
 import { dashboardApi } from "../../services/api";
 import { data } from "react-router";
+import * as XLSX from 'xlsx';
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("tabela");
@@ -48,11 +49,13 @@ const Dashboard: React.FC = () => {
   const [produtos, setProdutos] = useState<any[]>([]);
   const [departamentos, setDepartamentos] = useState<any[]>([]);
 
+
   // Estados dos filtros
   const [filtros, setFiltros] = useState({
     periodo: "todos",
     filial: "todas",
     departamento: "todos",
+    tipo_departamento: "todos",
     status: "todos"
   });
 
@@ -73,8 +76,10 @@ const Dashboard: React.FC = () => {
   const [departamentoForm, setDepartamentoForm] = useState({
     cadastro_filial: "",
     cadastro_departamento: "",
+    tipo_departamento: "",
     numero_serventes: "",
     previsto_total_ctr: ""
+
   });
   // Função para calcular métricas com base nos dados
   const calcularMetricas = (dados: any[]) => {
@@ -104,11 +109,12 @@ const Dashboard: React.FC = () => {
         dashboardApi.getDepartamentos()
       ]);
 
-      // Integrar dados de departamento na tabela consolidada
+      // ------------------ DADOS CONSOLIDADOS -------------- Integrar dados de departamento na tabela consolidada
       const dadosIntegrados = dadosConsolidados.map((item: any) => {
         const departamento = departamentosList.find((d: any) =>
           d.cadastro_filial === item.cadastro_filial &&
-          d.cadastro_departamento === item.cadastro_departamento
+          d.cadastro_departamento === item.cadastro_departamento &&
+          d.tipo_departamento == item.tipo_departamento
         );
 
         return {
@@ -124,8 +130,10 @@ const Dashboard: React.FC = () => {
         dadosFinais = departamentosList.map((dept: any) => ({
           filial: dept.cadastro_filial,
           data_base: 0,
+          servente_realizado: 0,
           cadastro_filial: dept.cadastro_filial,
           cadastro_departamento: dept.cadastro_departamento,
+          tipo_departamento: dept.tipo_departamento,
           numero_serventes: dept.numero_serventes,
           previsto_total_ctr: dept.previsto_total_ctr,
           previsto_per_capita: dept.numero_serventes > 0 ? (Number(dept.previsto_total_ctr) / Number(dept.numero_serventes)) : 0,
@@ -140,6 +148,10 @@ const Dashboard: React.FC = () => {
       setTabelaData(dadosFinais);
       setProdutos(produtosList);
       setDepartamentos(departamentosList);
+
+      //-------------------------------- //
+
+
 
       // Calcular métricas iniciais
       setMetricas(calcularMetricas(dadosFinais));
@@ -169,15 +181,29 @@ const Dashboard: React.FC = () => {
       const departamentoMatch = filtros.departamento === "todos" ||
         item.cadastro_departamento === filtros.departamento;
 
+      const tipoMatch = filtros.tipo_departamento === "todos" ||
+        item.tipo_departamento === filtros.tipo_departamento;
+
+
+
+
       const statusMatch = filtros.status === "todos" || item.status === filtros.status;
 
       const searchMatch = searchTerm === "" ||
         (item.filial || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.cadastro_filial || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.cadastro_departamento || "").toLowerCase().includes(searchTerm.toLowerCase());
+        (item.cadastro_departamento || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.tipo_departamento || "").toLowerCase().includes(searchTerm.toLowerCase());
 
-      return periodoMatch && filialMatch && departamentoMatch && statusMatch && searchMatch;
+      return periodoMatch && filialMatch && departamentoMatch && statusMatch && tipoMatch && searchMatch;
+
+
+
+
     });
+
+
+
   };
 
   // Atualizar métricas quando filtros ou dados mudarem
@@ -196,7 +222,7 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    
+
     setLoading(true);
     try {
       if (editandoId) {
@@ -210,7 +236,7 @@ const Dashboard: React.FC = () => {
 
 
 
-      
+
       // Limpar e recarregar
       setProdutoForm({ codigo: "", conta_financeira: "", descricao: "" });
       setEditandoId(null);
@@ -247,6 +273,7 @@ const Dashboard: React.FC = () => {
     const camposObrigatorios = [
       departamentoForm.cadastro_filial,
       departamentoForm.cadastro_departamento,
+      departamentoForm.tipo_departamento,
       departamentoForm.numero_serventes,
       departamentoForm.previsto_total_ctr
     ];
@@ -261,6 +288,7 @@ const Dashboard: React.FC = () => {
       const payload = {
         cadastro_filial: departamentoForm.cadastro_filial,
         cadastro_departamento: departamentoForm.cadastro_departamento,
+        tipo_departamento: departamentoForm.tipo_departamento,
         numero_serventes: Number(departamentoForm.numero_serventes),
         previsto_total_ctr: Number(departamentoForm.previsto_total_ctr)
       };
@@ -277,6 +305,7 @@ const Dashboard: React.FC = () => {
       setDepartamentoForm({
         cadastro_filial: "",
         cadastro_departamento: "",
+        tipo_departamento:"",
         numero_serventes: "",
         previsto_total_ctr: ""
       });
@@ -310,10 +339,6 @@ const Dashboard: React.FC = () => {
 
 
 
-
-
-
-
   // Filtrar produtos
   const produtosFiltrados = produtos.filter(produto =>
     (produto.descricao || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -323,8 +348,39 @@ const Dashboard: React.FC = () => {
   // Filtrar departamentos
   const departamentosFiltrados = departamentos.filter(dept =>
     (dept.cadastro_filial || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (dept.cadastro_departamento || "").toLowerCase().includes(searchTerm.toLowerCase())
+    (dept.cadastro_departamento || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (dept.tipo_departamento || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // EXPORT VIA XSLX //
+
+  const exportToExcel = () => {
+    const dadosParaExportar = dadosFiltrados.map(item => ({
+      Filial: item.filial || item.cadastro_filial,
+      Departamento: item.cadastro_departamento,
+      Tipo: item.tipo_departamento,
+      'Data Base': item.data_base ? `R$ ${Number(item.data_base).toFixed(2)}` : '',
+      'Nº Serventes': item.numero_serventes,
+      'Previsto Per Capita': item.previsto_per_capita ? `R$ ${Number(item.previsto_per_capita).toFixed(2)}` : '',
+      'Previsto Total CTR': item.previsto_total_ctr ? `R$ ${Number(item.previsto_total_ctr).toFixed(2)}` : '',
+      'Servente Realizado': item.servente_realizado ? `R$ ${Number(item.servente_realizado).toFixed(2)}` : '',
+      'Realizado Per Capita': item.realizado_per_capita ? `R$ ${Number(item.realizado_per_capita).toFixed(2)}` : '',
+      'Acumulado Total': item.acumulado_total ? `R$ ${Number(item.acumulado_total).toFixed(2)}` : '',
+      Diferença: item.diferenca ? `R$ ${Number(item.diferenca).toFixed(2)}` : '',
+      'Variação (%)': item.variacao ? `${Number(item.variacao).toFixed(2)}%` : '',
+      Status: item.status
+    }));
+
+    // Criar uma planilha do Excel
+    const worksheet = XLSX.utils.json_to_sheet(dadosParaExportar);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "DadosConsolidados");
+
+    // Gerar o arquivo e fazer download
+    XLSX.writeFile(workbook, `dados_consolidados_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+
 
 
 
@@ -423,6 +479,19 @@ const Dashboard: React.FC = () => {
           </select>
         </FilterGroup>
         <FilterGroup>
+          <label>🏷️ Tipo</label>
+          <select
+            value={filtros.tipo_departamento}
+            onChange={(e) => setFiltros({ ...filtros, tipo_departamento: e.target.value })}
+          >
+            <option value="todos">Todos os tipos</option>
+            {[...new Set(tabelaData.map(item => item.tipo_departamento))].map(tipo => (
+              <option key={tipo} value={tipo}>{tipo}</option>
+            ))}
+          </select>
+        </FilterGroup>
+
+        <FilterGroup>
           <label>🚦 Status</label>
           <select
             value={filtros.status}
@@ -455,6 +524,12 @@ const Dashboard: React.FC = () => {
             <h2>📊 Dados Consolidados</h2>
             <div className="table-actions">
               <span>{dadosFiltrados.length} registros encontrados</span>
+              <Button
+                onClick={exportToExcel}
+                style={{ marginLeft: '10px' }}
+              >
+                📤 Exportar para Excel
+              </Button>
             </div>
           </div>
 
@@ -483,13 +558,15 @@ const Dashboard: React.FC = () => {
                 <thead>
                   <tr>
                     <th>Filial</th>
-                    <th>Data Base</th>
-                    <th>Previsto Per Capita</th>
                     <th>Departamento</th>
+                    <th>Tipo</th>
+                    <th>Data Base</th>
                     <th>Nº Serventes</th>
+                    <th>Previsto per Capita</th>
                     <th>Previsto Total CTR</th>
+                    <th>Servente Realizado</th>
                     <th>Realizado Per Capita</th>
-                    <th>Acumulado Total</th>
+                    <th>Realizado Total</th>
                     <th>Diferença</th>
                     <th>% Variação</th>
                     <th>Status</th>
@@ -501,20 +578,25 @@ const Dashboard: React.FC = () => {
                       <td data-label="Filial">
                         <strong>{row.filial || row.cadastro_filial}</strong>
                       </td>
+                      <td data-label="Cad. Departamento">{row.cadastro_departamento}</td>
+                      <td data-label="Tipo">
+                        <strong>{row.tipo || row.tipo_departamento}</strong>
+                      </td>
                       <td data-label="Data Base" style={{ color: 'red' }}>
                         R$ {Number(row.data_base || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
-
-                      <td data-label="Previsto Per Capita">
-                        R$ {Number(row.previsto_per_capita || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </td>
-
-                      <td data-label="Cad. Departamento">{row.cadastro_departamento}</td>
                       <td data-label="Nº Serventes">
                         <span className="badge-number">{row.numero_serventes}</span>
                       </td>
+                      <td data-label="Previsto Per Capita">
+                        R$ {Number(row.previsto_per_capita || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </td>
                       <td data-label="Previsto Total CTR">
                         R$ {Number(row.previsto_total_ctr || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </td>
+
+                      <td data-label="Servente Realizado" style={{ color: 'red' }}>
+                        R$ {Number(row.servente_realizado || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
 
                       <td data-label="Realizado Per Capita" style={{ color: 'red' }}>
@@ -625,6 +707,7 @@ const Dashboard: React.FC = () => {
                     setDepartamentoForm({
                       cadastro_filial: departamento.cadastro_filial,
                       cadastro_departamento: departamento.cadastro_departamento,
+                      tipo_departamento: departamento.tipo_departamento,
                       numero_serventes: departamento.numero_serventes,
                       previsto_total_ctr: departamento.previsto_total_ctr
                     });
@@ -649,126 +732,137 @@ const Dashboard: React.FC = () => {
 
       {/* Modal Cadastro Produto */}
       {showProdutoModal && (
-  <Modal onClick={() => {
-    setShowProdutoModal(false);
-    setEditandoId(null);
-    setProdutoForm({ codigo: "", conta_financeira: "", descricao: "" });
-  }}>
-    <ModalContent onClick={(e) => e.stopPropagation()}>
-      <ModalHeader>
-        <h2>{editandoId ? "✏️ Editar Produto" : "📦 Cadastrar Novo Produto"}</h2>
-        <CloseButton onClick={() => setShowProdutoModal(false)}>×</CloseButton>
-      </ModalHeader>
-      <ModalBody>
-        <FormGroup>
-          <label>Código *</label>
-          <Input
-            value={produtoForm.codigo}
-            onChange={(e) => setProdutoForm({ ...produtoForm, codigo: e.target.value })}
-            placeholder="Digite o código do produto"
-          />
-        </FormGroup>
-        <FormGroup>
-          <label>Conta Financeira *</label>
-          <Input
-            value={produtoForm.conta_financeira}
-            onChange={(e) => setProdutoForm({ ...produtoForm, conta_financeira: e.target.value })}
-            placeholder="Digite a conta financeira"
-          />
-        </FormGroup>
-        <FormGroup>
-          <label>Descrição *</label>
-          <Input
-            value={produtoForm.descricao}
-            onChange={(e) => setProdutoForm({ ...produtoForm, descricao: e.target.value })}
-            placeholder="Digite a descrição do produto"
-          />
-        </FormGroup>
-      </ModalBody>
-      <ModalFooter>
-        <Button
-          className="secondary"
-          onClick={() => setShowProdutoModal(false)}
-          disabled={loading}
-        >
-          Cancelar
-        </Button>
-        <Button onClick={salvarProduto} disabled={loading}>
-          {loading ? "Salvando..." : (editandoId ? "Atualizar Produto" : "Salvar Produto")}
-        </Button>
-      </ModalFooter>
-    </ModalContent>
-  </Modal>
-)}
+        <Modal onClick={() => {
+          setShowProdutoModal(false);
+          setEditandoId(null);
+          setProdutoForm({ codigo: "", conta_financeira: "", descricao: "" });
+        }}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <h2>{editandoId ? "✏️ Editar Produto" : "📦 Cadastrar Novo Produto"}</h2>
+              <CloseButton onClick={() => setShowProdutoModal(false)}>×</CloseButton>
+            </ModalHeader>
+            <ModalBody>
+              <FormGroup>
+                <label>Código *</label>
+                <Input
+                  value={produtoForm.codigo}
+                  onChange={(e) => setProdutoForm({ ...produtoForm, codigo: e.target.value })}
+                  placeholder="Digite o código do produto"
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Conta Financeira *</label>
+                <Input
+                  value={produtoForm.conta_financeira}
+                  onChange={(e) => setProdutoForm({ ...produtoForm, conta_financeira: e.target.value })}
+                  placeholder="Digite a conta financeira"
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Descrição *</label>
+                <Input
+                  value={produtoForm.descricao}
+                  onChange={(e) => setProdutoForm({ ...produtoForm, descricao: e.target.value })}
+                  placeholder="Digite a descrição do produto"
+                />
+              </FormGroup>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                className="secondary"
+                onClick={() => setShowProdutoModal(false)}
+                disabled={loading}
+              >
+                Cancelar
+              </Button>
+              <Button onClick={salvarProduto} disabled={loading}>
+                {loading ? "Salvando..." : (editandoId ? "Atualizar Produto" : "Salvar Produto")}
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
       {/* Modal Cadastro Departamento */}
-{showDepartamentoModal && (
-  <Modal onClick={() => {
-    setShowDepartamentoModal(false);
-    setEditandoId(null);
-    setDepartamentoForm({ 
-      cadastro_filial: "", 
-      cadastro_departamento: "", 
-      numero_serventes: "", 
-      previsto_total_ctr: "" 
-    });
-  }}>
-    <ModalContent onClick={(e) => e.stopPropagation()}>
-      <ModalHeader>
-        <h2>{editandoId ? "✏️ Editar Departamento" : "🏢 Cadastrar Novo Departamento"}</h2>
-        <CloseButton onClick={() => setShowDepartamentoModal(false)}>×</CloseButton>
-      </ModalHeader>
-      <ModalBody>
-        <FormGroup>
-          <label>Filial *</label>
-          <Input
-            value={departamentoForm.cadastro_filial}
-            onChange={(e) => setDepartamentoForm({ ...departamentoForm, cadastro_filial: e.target.value })}
-            placeholder="Digite o nome da filial"
-          />
-        </FormGroup>
-        <FormGroup>
-          <label>Departamento *</label>
-          <Input
-            value={departamentoForm.cadastro_departamento}
-            onChange={(e) => setDepartamentoForm({ ...departamentoForm, cadastro_departamento: e.target.value })}
-            placeholder="Digite o nome do departamento"
-          />
-        </FormGroup>
-        <FormGroup>
-          <label>Número de Serventes *</label>
-          <Input
-            type="number"
-            value={departamentoForm.numero_serventes}
-            onChange={(e) => setDepartamentoForm({ ...departamentoForm, numero_serventes: e.target.value })}
-            placeholder="Digite o número de serventes"
-          />
-        </FormGroup>
-        <FormGroup>
-          <label>Previsto Total CTR *</label>
-          <Input
-            type="number"
-            step="0.01"
-            value={departamentoForm.previsto_total_ctr}
-            onChange={(e) => setDepartamentoForm({ ...departamentoForm, previsto_total_ctr: e.target.value })}
-            placeholder="Digite o valor previsto"
-          />
-        </FormGroup>
-      </ModalBody>
-      <ModalFooter>
-        <Button
-          className="secondary"
-          onClick={() => setShowDepartamentoModal(false)}
-          disabled={loading}
-        >
-          Cancelar
-        </Button>
-        <Button onClick={salvarDepartamento} disabled={loading}>
-          {loading ? "Salvando..." : (editandoId ? "Atualizar Departamento" : "Salvar Departamento")}
-        </Button>
-      </ModalFooter>
-    </ModalContent>
-  </Modal>
-)}
+      {showDepartamentoModal && (
+        <Modal onClick={() => {
+          setShowDepartamentoModal(false);
+          setEditandoId(null);
+          setDepartamentoForm({
+            cadastro_filial: "",
+            cadastro_departamento: "",
+            tipo_departamento: "",
+            numero_serventes: "",
+            previsto_total_ctr: ""
+
+          });
+        }}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <h2>{editandoId ? "✏️ Editar Departamento" : "🏢 Cadastrar Novo Departamento"}</h2>
+              <CloseButton onClick={() => setShowDepartamentoModal(false)}>×</CloseButton>
+            </ModalHeader>
+            <ModalBody>
+              <FormGroup>
+                <label>Filial *</label>
+                <Input
+                  value={departamentoForm.cadastro_filial}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm, cadastro_filial: e.target.value })}
+                  placeholder="Digite o nome da filial"
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Departamento *</label>
+                <Input
+                  value={departamentoForm.cadastro_departamento}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm, cadastro_departamento: e.target.value })}
+                  placeholder="Digite o nome do departamento"
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Tipo *</label>
+                <Input
+                  value={departamentoForm.tipo_departamento}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm, tipo_departamento: e.target.value })}
+                  placeholder="Digite o tipo do departamento"
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>Número de Serventes *</label>
+                <Input
+                  type="number"
+                  value={departamentoForm.numero_serventes}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm, numero_serventes: e.target.value })}
+                  placeholder="Digite o número de serventes"
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Previsto Total CTR *</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={departamentoForm.previsto_total_ctr}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm, previsto_total_ctr: e.target.value })}
+                  placeholder="Digite o valor previsto"
+                />
+              </FormGroup>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                className="secondary"
+                onClick={() => setShowDepartamentoModal(false)}
+                disabled={loading}
+              >
+                Cancelar
+              </Button>
+              <Button onClick={salvarDepartamento} disabled={loading}>
+                {loading ? "Salvando..." : (editandoId ? "Atualizar Departamento" : "Salvar Departamento")}
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
       {/* Floating Action Button para mobile */}
       <FloatingActionButton
         onClick={() => {
@@ -781,6 +875,7 @@ const Dashboard: React.FC = () => {
             setDepartamentoForm({
               cadastro_filial: "",
               cadastro_departamento: "",
+              tipo_departamento: "",
               numero_serventes: "",
               previsto_total_ctr: ""
             });
