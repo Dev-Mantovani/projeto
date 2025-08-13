@@ -29,7 +29,16 @@ import {
   EmptyState,
   LoadingSpinner,
   FloatingActionButton,
-  ResponsiveTable
+  ResponsiveTable,
+  ProductSelectionModal,
+  ProductSelectionCard,
+  ProductSelectionContent,
+  ProductGrid,
+  ProductIcon,
+  ProductInfo,
+  SelectionIndicator,
+  ConfettiEffect,
+  ProductSelectionFooter
 } from "./styles";
 
 import { dashboardApi } from "../../services/api";
@@ -43,6 +52,11 @@ const Dashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [showAdicionarProdutoModal, setShowAdicionarProdutoModal] = useState(false);
+  const [departamentoParaAdicionar, setDepartamentoParaAdicionar] = useState<number | null>(null);
+  const [produtosDisponiveis, setProdutosDisponiveis] = useState<any[]>([]);
+  const [produtosSelecionados, setProdutosSelecionados] = useState<number[]>([]);
+  const [produtosPorDepartamento, setProdutosPorDepartamento] = useState<{ [key: number]: any[] }>({});
 
   // Estados dos dados
   const [tabelaData, setTabelaData] = useState<any[]>([]);
@@ -305,7 +319,7 @@ const Dashboard: React.FC = () => {
       setDepartamentoForm({
         cadastro_filial: "",
         cadastro_departamento: "",
-        tipo_departamento:"",
+        tipo_departamento: "",
         numero_serventes: "",
         previsto_total_ctr: ""
       });
@@ -381,6 +395,73 @@ const Dashboard: React.FC = () => {
   };
 
 
+  // Carregar produtos de um departamento
+  const carregarProdutosDepartamento = async (departamentoId: number) => {
+    try {
+      const produtos = await dashboardApi.getProdutosPorDepartamento(departamentoId);
+      setProdutosPorDepartamento(prev => ({
+        ...prev,
+        [departamentoId]: produtos || []
+      }));
+    } catch (error) {
+      console.error("Erro ao carregar produtos do departamento:", error);
+      setProdutosPorDepartamento(prev => ({
+        ...prev,
+        [departamentoId]: []
+      }));
+    }
+  };
+  const carregarProdutosDisponiveis = async () => {
+    try {
+      const produtos = await dashboardApi.getProdutos();
+      setProdutosDisponiveis(produtos || []);
+    } catch (error) {
+      console.error("Erro ao carregar produtos disponíveis:", error);
+      setProdutosDisponiveis([]);
+    }
+  };
+
+  // Modifique o useEffect existente para incluir o carregamento dos produtos disponíveis
+  useEffect(() => {
+    const carregarTodosDados = async () => {
+      await carregarDados();
+      await carregarProdutosDisponiveis();
+    };
+
+    carregarTodosDados();
+  }, []);
+
+  // PRODUTO X DEPARTAMENTO//
+
+  // Adicionar produto a um departamento
+
+
+  // Remover produto de um departamento
+  const removerProdutoDepartamento = async (departamentoId: number, produtoId: number) => {
+    if (!confirm("Remover este produto do departamento?")) return;
+
+    try {
+      await dashboardApi.removerProdutoDoDepartamento(departamentoId, produtoId);
+      await carregarProdutosDepartamento(departamentoId);
+      alert("Produto removido com sucesso!");
+    } catch (error) {
+      console.error("Erro ao remover produto:", error);
+      alert("Erro ao remover produto");
+    }
+  };
+
+  // Atualize o useEffect para carregar produtos ao carregar departamentos
+  useEffect(() => {
+    if (departamentos.length > 0) {
+      departamentos.forEach(dept => {
+        if (dept.id) {
+          carregarProdutosDepartamento(dept.id).catch(error => {
+            console.error(`Erro ao carregar produtos do departamento ${dept.id}:`, error);
+          });
+        }
+      });
+    }
+  }, [departamentos]);
 
 
 
@@ -509,6 +590,7 @@ const Dashboard: React.FC = () => {
         <TabButton active={activeTab === "tabela"} onClick={() => setActiveTab("tabela")}>
           📊 Tabela Consolidada
         </TabButton>
+    
         <TabButton active={activeTab === "produtos"} onClick={() => setActiveTab("produtos")}>
           📦 Produtos ({produtos.length})
         </TabButton>
@@ -725,6 +807,39 @@ const Dashboard: React.FC = () => {
                   🗑️
                 </IconButton>
               </div>
+              <div className="department-products">
+                <div className="products-header">
+                  <h4>Produtos Associados</h4>
+                  <Button
+                    onClick={() => {
+                      setDepartamentoParaAdicionar(departamento.id);
+                      setProdutosSelecionados([]);
+                      setShowAdicionarProdutoModal(true);
+                    }}
+                  >
+                    ➕ Adicionar Produtos
+                  </Button>
+                </div>
+
+                {produtosPorDepartamento[departamento.id]?.length > 0 ? (
+                  <ul className="products-list">
+                    {produtosPorDepartamento[departamento.id].map(produto => (
+                      <li key={produto.id} className="product-item">
+                        <span>{produto.descricao} ({produto.codigo})</span>
+                        <IconButton
+                          className="danger"
+                          onClick={() => removerProdutoDepartamento(departamento.id, produto.id)}
+                        >
+                          🗑️
+                        </IconButton>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="no-products">Nenhum produto associado</p>
+                )}
+              </div>
+
             </DepartmentCard>
           ))}
         </div>
@@ -862,6 +977,85 @@ const Dashboard: React.FC = () => {
             </ModalFooter>
           </ModalContent>
         </Modal>
+      )}
+
+      {/* Modal Adicionar Produtos */}
+      {showAdicionarProdutoModal && (
+        <ProductSelectionModal onClick={() => setShowAdicionarProdutoModal(false)}>
+          <ProductSelectionContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <h2>📦 Adicionar Produtos</h2>
+              <CloseButton onClick={() => setShowAdicionarProdutoModal(false)}>×</CloseButton>
+            </ModalHeader>
+
+            <ModalBody>
+              <ProductGrid>
+                {produtosDisponiveis.map(produto => {
+                  const isSelected = produtosSelecionados.includes(produto.id);
+                  return (
+                    <ProductSelectionCard
+                      key={produto.id}
+                      selected={isSelected}
+                      onClick={() => {
+                        setProdutosSelecionados(prev =>
+                          prev.includes(produto.id)
+                            ? prev.filter(id => id !== produto.id)
+                            : [...prev, produto.id]
+                        );
+                      }}
+                    >
+
+                      <ProductIcon selected={isSelected}>
+                        📦
+                      </ProductIcon>
+
+                      <ProductInfo>
+                        <h3>{produto.descricao}</h3>
+                        <p> {produto.codigo}</p>
+                        <p> {produto.conta_financeira}</p>
+                      </ProductInfo>
+
+                      <SelectionIndicator selected={isSelected} />
+                    </ProductSelectionCard>
+                  );
+                })}
+              </ProductGrid>
+            </ModalBody>
+
+            <ProductSelectionFooter>
+              <div className="selected-count">
+                Selecionados: <span>{produtosSelecionados.length}</span>
+              </div>
+              <Button
+                onClick={async () => {
+                  if (departamentoParaAdicionar && produtosSelecionados.length > 0) {
+                    setLoading(true);
+                    try {
+                      // Adiciona todos os produtos selecionados
+                      await Promise.all(
+                        produtosSelecionados.map(produtoId =>
+                          dashboardApi.adicionarProdutoAoDepartamento(departamentoParaAdicionar, produtoId)
+                        )
+                      );
+                      // Atualiza a lista de produtos do departamento
+                      await carregarProdutosDepartamento(departamentoParaAdicionar);
+                      setShowAdicionarProdutoModal(false);
+                      alert("Produtos adicionados com sucesso!");
+                    } catch (error) {
+                      console.error("Erro ao adicionar produtos:", error);
+                      alert("Erro ao adicionar produtos");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }
+                }}
+                disabled={produtosSelecionados.length === 0 || loading}
+              >
+                {loading ? "Adicionando..." : `Adicionar (${produtosSelecionados.length})`}
+              </Button>
+            </ProductSelectionFooter>
+          </ProductSelectionContent>
+        </ProductSelectionModal>
       )}
       {/* Floating Action Button para mobile */}
       <FloatingActionButton

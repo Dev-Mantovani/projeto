@@ -161,6 +161,47 @@ app.delete("/departamentos/:id", async (req, res) => {
   res.json(data);
 });
 
+// ================== PRODUTOS POR DEPARTAMENTO ==================
+
+// Obter produtos de um departamento
+app.get('/departamentos/:id/produtos', async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from('departamento_produtos')
+    .select('produtos(*)')
+    .eq('departamento_id', id);
+  
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data.map(item => item.produtos));
+});
+
+// Adicionar produto a um departamento
+app.post('/departamentos/:id/produtos', async (req, res) => {
+  const { id } = req.params;
+  const { produto_id } = req.body;
+  
+  const { data, error } = await supabase
+    .from('departamento_produtos')
+    .insert([{ departamento_id: id, produto_id }]);
+    
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(201).json(data);
+});
+
+// Remover produto de um departamento
+app.delete('/departamentos/:departamento_id/produtos/:produto_id', async (req, res) => {
+  const { departamento_id, produto_id } = req.params;
+  
+  const { data, error } = await supabase
+    .from('departamento_produtos')
+    .delete()
+    .eq('departamento_id', departamento_id)
+    .eq('produto_id', produto_id);
+    
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
 
 
 // Start server

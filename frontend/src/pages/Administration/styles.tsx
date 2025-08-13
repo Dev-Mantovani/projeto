@@ -711,8 +711,7 @@ export const DepartmentCard = styled(Card)`
       border: 1px solid #ddd;
     }
   }
-  
-`;
+  ` ;
 
 export const IconButton = styled.button`
   padding: 8px;
@@ -886,6 +885,140 @@ export const FloatingActionButton = styled.button`
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+`;
+
+export const ProductSelectionModal = styled(Modal)`
+  /* Herda tudo do Modal base */
+`;
+
+export const ProductSelectionContent = styled(ModalContent)`
+  /* Herda do ModalContent base */
+  max-width: 700px;
+`;
+
+export const ProductGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+`;
+
+export const ProductSelectionCard = styled.div<{ selected: boolean }>`
+  position: relative;
+  border: 2px solid ${({ selected }) => (selected ? '#4CAF50' : '#e0e0e0')};
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: ${({ selected }) => (selected ? '#f8fff8' : 'white')};
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+    border-color: ${({ selected }) => (selected ? '#4CAF50' : '#a5d6a7')};
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+    opacity: ${({ selected }) => (selected ? '1' : '0')};
+    transition: opacity 0.3s;
+  }
+`;
+
+export const ProductIcon = styled.div<{ selected: boolean }>`
+  font-size: 28px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${({ selected }) => 
+    selected 
+      ? 'linear-gradient(135deg, #2d7d32, #4CAF50)'
+      : 'linear-gradient(135deg, #e8f5e9, #c8e6c9)'};
+  color: ${({ selected }) => (selected ? 'white' : '#388e3c')};
+  border-radius: 12px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  transform: ${({ selected }) => (selected ? 'scale(1.1)' : 'scale(1)')};
+`;
+
+export const ProductInfo = styled.div`
+  h3 {
+    margin: 0 0 5px 0;
+    color: #1b5e20;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 3px 0;
+    font-size: 12px;
+    color: #666;
+  }
+`;
+
+export const SelectionIndicator = styled.div<{ selected: boolean }>`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${({ selected }) => (selected ? '#4CAF50' : '#e0e0e0')};
+  color: white;
+  transition: all 0.3s ease;
+
+  &::after {
+    content: '${({ selected }) => (selected ? '✓' : '+')}';
+    font-weight: bold;
+  }
+`;
+
+export const ConfettiEffect = styled.div<{ selected: boolean }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="1" fill="%234CAF50"/></svg>');
+  background-size: 10px 10px;
+  opacity: ${({ selected }) => (selected ? '1' : '0')};
+  transition: opacity 0.3s;
+  pointer-events: none;
+`;
+
+
+export const ProductSelectionFooter = styled(ModalFooter)`
+  border-top: 1px solid #e8f5e9;
+  padding: 20px 25px;
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .selected-count {
+    font-size: 14px;
+    color: #1b5e20;
+    font-weight: 600;
+    
+    span {
+      background: #e8f5e9;
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin-left: 5px;
+    }
   }
 `;
 

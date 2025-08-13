@@ -100,9 +100,25 @@ export const dashboardApi = {
 
 // Departamento + Produtos
 
+// ---- Produtos x Departamentos ----
 
-
+getProdutosPorDepartamento: async (departamentoId: number) => {
+    const { data } = await api.get(`/departamentos/${departamentoId}/produtos`);
+    return data;
+  },
+  
+  adicionarProdutoAoDepartamento: async (departamentoId: number, produtoId: number) => {
+    const { data } = await api.post(`/departamentos/${departamentoId}/produtos`, { produto_id: produtoId });
+    return data;
+  },
+  
+  removerProdutoDoDepartamento: async (departamentoId: number, produtoId: number) => {
+    const { data } = await api.delete(`/departamentos/${departamentoId}/produtos/${produtoId}`);
+    return data;
+  }
 };
+
+
 
 
 
