@@ -57,6 +57,7 @@ const Dashboard: React.FC = () => {
   const [produtosDisponiveis, setProdutosDisponiveis] = useState<any[]>([]);
   const [produtosSelecionados, setProdutosSelecionados] = useState<number[]>([]);
   const [produtosPorDepartamento, setProdutosPorDepartamento] = useState<{ [key: number]: any[] }>({});
+  const [expandedDepartamentos, setExpandedDepartamentos] = useState<Record<number, boolean>>({});
 
   // Estados dos dados
   const [tabelaData, setTabelaData] = useState<any[]>([]);
@@ -84,7 +85,10 @@ const Dashboard: React.FC = () => {
   const [produtoForm, setProdutoForm] = useState({
     codigo: "",
     conta_financeira: "",
-    descricao: ""
+    descricao: "",
+    produto_quantidade: 0,
+    valor_unitario: 0,
+    valor_total: 0
   });
 
   const [departamentoForm, setDepartamentoForm] = useState({
@@ -228,34 +232,32 @@ const Dashboard: React.FC = () => {
 
   const dadosFiltrados = filtrarDados();
 
-
   // -------------------------Cadastrar Produto------------------
   const salvarProduto = async () => {
-    if (!produtoForm.codigo || !produtoForm.conta_financeira || !produtoForm.descricao) {
+    if (!produtoForm.codigo || !produtoForm.conta_financeira || !produtoForm.descricao || !produtoForm.produto_quantidade || !produtoForm.valor_unitario || !produtoForm.valor_total) {
       alert("Preencha todos os campos obrigatórios");
       return;
     }
-
 
     setLoading(true);
     try {
       if (editandoId) {
         await dashboardApi.updateProduto(editandoId, produtoForm);
         alert("Produto atualizado com sucesso!");
-
       } else {
         await dashboardApi.createProduto(produtoForm);
         alert("Produto cadastrado com sucesso!");
       }
 
+      // Atualiza ambas as listas
+      await Promise.all([
+        carregarDados(), // Recarrega a lista principal
+        carregarProdutosDisponiveis() // Recarrega os produtos disponíveis para associação
+      ]);
 
-
-
-      // Limpar e recarregar
-      setProdutoForm({ codigo: "", conta_financeira: "", descricao: "" });
+      setProdutoForm({ codigo: "", conta_financeira: "", descricao: "", produto_quantidade: 0, valor_unitario: 0, valor_total: 0 });
       setEditandoId(null);
       setShowProdutoModal(false);
-      await carregarDados();
     } catch (error) {
       console.error("Erro ao salvar produto:", error);
       alert("Erro ao salvar produto");
@@ -435,6 +437,35 @@ const Dashboard: React.FC = () => {
 
   // Adicionar produto a um departamento
 
+  const adicionarProdutosAoDepartamento = async () => {
+    if (!departamentoParaAdicionar || produtosSelecionados.length === 0) return;
+
+    setLoading(true);
+    try {
+      // Adiciona todos os produtos selecionados
+      await Promise.all(
+        produtosSelecionados.map(produtoId =>
+          dashboardApi.adicionarProdutoAoDepartamento(departamentoParaAdicionar, produtoId)
+        )
+      );
+
+      // Atualiza as listas
+      await Promise.all([
+        carregarProdutosDepartamento(departamentoParaAdicionar),
+        carregarProdutosDisponiveis() // Recarrega os produtos disponíveis
+      ]);
+
+      setShowAdicionarProdutoModal(false);
+      setProdutosSelecionados([]);
+      alert("Produtos adicionados com sucesso!");
+    } catch (error) {
+      console.error("Erro ao adicionar produtos:", error);
+      alert("Erro ao adicionar produtos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   // Remover produto de um departamento
   const removerProdutoDepartamento = async (departamentoId: number, produtoId: number) => {
@@ -463,6 +494,14 @@ const Dashboard: React.FC = () => {
     }
   }, [departamentos]);
 
+  // Vizualização dos Produtos no Departamento // 
+
+  const toggleExpandDepartamento = (departamentoId: number) => {
+  setExpandedDepartamentos(prev => ({
+    ...prev,
+    [departamentoId]: !prev[departamentoId]
+  }));
+};
 
 
   if (loading && tabelaData.length === 0) {
@@ -590,7 +629,7 @@ const Dashboard: React.FC = () => {
         <TabButton active={activeTab === "tabela"} onClick={() => setActiveTab("tabela")}>
           📊 Tabela Consolidada
         </TabButton>
-    
+
         <TabButton active={activeTab === "produtos"} onClick={() => setActiveTab("produtos")}>
           📦 Produtos ({produtos.length})
         </TabButton>
@@ -722,8 +761,29 @@ const Dashboard: React.FC = () => {
               </div>
               <h3>{produto.descricao}</h3>
               <div className="product-details">
-                <span className="detail-label">Conta Financeira:</span>
-                <span className="detail-value">{produto.conta_financeira}</span>
+                <div className="detail-item">
+                  <span className="detail-label">Conta Financeira</span>
+                  <span className="detail-value">{produto.conta_financeira || '-'}</span>
+                </div>
+
+                <div className="detail-item">
+                  <span className="detail-label">Quantidade</span>
+                  <span className="detail-value">{produto.produto_quantidade || '0'}</span>
+                </div>
+
+                <div className="detail-item">
+                  <span className="detail-label">Valor Unitário</span>
+                  <span className="detail-value">
+                    {produto.valor_unitario ? `R$ ${Number(produto.valor_unitario).toFixed(2)}` : 'R$ 0,00'}
+                  </span>
+                </div>
+
+                <div className="detail-item">
+                  <span className="detail-label">Valor Total</span>
+                  <span className="detail-value">
+                    {produto.valor_total ? `R$ ${Number(produto.valor_total).toFixed(2)}` : 'R$ 0,00'}
+                  </span>
+                </div>
               </div>
               <div className="product-actions">
                 <IconButton
@@ -732,7 +792,10 @@ const Dashboard: React.FC = () => {
                     setProdutoForm({
                       codigo: produto.codigo,
                       conta_financeira: produto.conta_financeira,
-                      descricao: produto.descricao
+                      descricao: produto.descricao,
+                      produto_quantidade: produto.produto_quantidade,
+                      valor_unitario: produto.valor_unitario,
+                      valor_total: produto.valor_total
                     });
                     setEditandoId(produto.id);
                     setShowProdutoModal(true);
@@ -822,21 +885,43 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 {produtosPorDepartamento[departamento.id]?.length > 0 ? (
-                  <ul className="products-list">
-                    {produtosPorDepartamento[departamento.id].map(produto => (
-                      <li key={produto.id} className="product-item">
-                        <span>{produto.descricao} ({produto.codigo})</span>
-                        <IconButton
-                          className="danger"
-                          onClick={() => removerProdutoDepartamento(departamento.id, produto.id)}
-                        >
+                  <div className="linked-products-container">
+                    <div className="linked-products-header">
+                      <h4>📦 Produtos Vinculados</h4>
+                      <span className="count-badge">{produtosPorDepartamento[departamento.id].length} itens</span>
+                    </div>
+                    <ul className="linked-products-list">
+                      {produtosPorDepartamento[departamento.id].map(produto => (
+                        <li key={produto.id} className="linked-product-item">
+                          <div className="product-main-info">
+                            <span className="product-name">{produto.descricao}</span>
+                            <span className="product-code">{produto.codigo}</span>
+                          </div>
+                          <div className="product-values">
+                            <div className="value-item">
+                              <span className="value-label">Unitário:</span>
+                              <span className="value-amount">{produto.valor_unitario ? `R$ ${Number(produto.valor_unitario).toFixed(2)}` : 'R$ 0,00'}</span>
+                            </div>
+                            <div className="value-item">
+                              <span className="value-label">Total:</span>
+                              <span className="value-amount">{produto.valor_total ? `R$ ${Number(produto.valor_total).toFixed(2)}` : 'R$ 0,00'}</span>
+                            </div>
+                          </div>
+                          <IconButton
+                            className="danger remove-button"
+                            onClick={() => removerProdutoDepartamento(departamento.id, produto.id)}
+                            title="Remover produto"
+                          >
                           🗑️
-                        </IconButton>
-                      </li>
-                    ))}
-                  </ul>
+                          </IconButton>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ) : (
-                  <p className="no-products">Nenhum produto associado</p>
+                  <div className="no-products-message">
+                    <span>Nenhum produto vinculado</span>
+                  </div>
                 )}
               </div>
 
@@ -850,7 +935,7 @@ const Dashboard: React.FC = () => {
         <Modal onClick={() => {
           setShowProdutoModal(false);
           setEditandoId(null);
-          setProdutoForm({ codigo: "", conta_financeira: "", descricao: "" });
+          setProdutoForm({ codigo: "", conta_financeira: "", descricao: "", produto_quantidade: 0, valor_unitario: 0, valor_total: 0 });
         }}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalHeader>
@@ -880,6 +965,45 @@ const Dashboard: React.FC = () => {
                   value={produtoForm.descricao}
                   onChange={(e) => setProdutoForm({ ...produtoForm, descricao: e.target.value })}
                   placeholder="Digite a descrição do produto"
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Quantidade *</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={produtoForm.produto_quantidade}
+                  onChange={(e) => setProdutoForm({
+                    ...produtoForm,
+                    produto_quantidade: parseFloat(e.target.value) || 0
+                  })}
+                  placeholder="Digite a quantidade"
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Valor Unitário *</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={produtoForm.valor_unitario}
+                  onChange={(e) => setProdutoForm({
+                    ...produtoForm,
+                    valor_unitario: parseFloat(e.target.value) || 0
+                  })}
+                  placeholder="Digite o valor unitário"
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Valor Total *</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={produtoForm.valor_total}
+                  onChange={(e) => setProdutoForm({
+                    ...produtoForm,
+                    valor_total: parseFloat(e.target.value) || 0
+                  })}
+                  placeholder="Digite o valor total"
                 />
               </FormGroup>
             </ModalBody>
@@ -1011,8 +1135,11 @@ const Dashboard: React.FC = () => {
 
                       <ProductInfo>
                         <h3>{produto.descricao}</h3>
-                        <p> {produto.codigo}</p>
-                        <p> {produto.conta_financeira}</p>
+                        <p> Descrição: {produto.codigo}</p>
+                        <p> Conta: {produto.conta_financeira}</p>
+                        <p> Quantidade: {produto.produto_quantidade}</p>
+                        <p> Valor Unit: {produto.valor_unitario}</p>
+                        <p> Valor Total: {produto.valor_total}</p>
                       </ProductInfo>
 
                       <SelectionIndicator selected={isSelected} />
@@ -1027,28 +1154,7 @@ const Dashboard: React.FC = () => {
                 Selecionados: <span>{produtosSelecionados.length}</span>
               </div>
               <Button
-                onClick={async () => {
-                  if (departamentoParaAdicionar && produtosSelecionados.length > 0) {
-                    setLoading(true);
-                    try {
-                      // Adiciona todos os produtos selecionados
-                      await Promise.all(
-                        produtosSelecionados.map(produtoId =>
-                          dashboardApi.adicionarProdutoAoDepartamento(departamentoParaAdicionar, produtoId)
-                        )
-                      );
-                      // Atualiza a lista de produtos do departamento
-                      await carregarProdutosDepartamento(departamentoParaAdicionar);
-                      setShowAdicionarProdutoModal(false);
-                      alert("Produtos adicionados com sucesso!");
-                    } catch (error) {
-                      console.error("Erro ao adicionar produtos:", error);
-                      alert("Erro ao adicionar produtos");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }
-                }}
+                onClick={adicionarProdutosAoDepartamento}
                 disabled={produtosSelecionados.length === 0 || loading}
               >
                 {loading ? "Adicionando..." : `Adicionar (${produtosSelecionados.length})`}
@@ -1061,7 +1167,7 @@ const Dashboard: React.FC = () => {
       <FloatingActionButton
         onClick={() => {
           if (activeTab === "produtos") {
-            setProdutoForm({ codigo: "", conta_financeira: "", descricao: "" });
+            setProdutoForm({ codigo: "", conta_financeira: "", descricao: "", produto_quantidade: 0, valor_unitario: 0, valor_total: 0 });
             setEditandoId(null);
             setShowProdutoModal(true);
           }

@@ -580,33 +580,52 @@ export const ProductCard = styled(Card)`
     font-weight: 700;
   }
 
-  .product-details {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    padding: 12px;
-    background: #f1f8e9;
-    border-radius: 8px;
+ .product-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  padding: 12px;
+  background: #f1f8e9;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
 
-    .detail-label {
-      font-size: 12px;
-      color: #388e3c;
-      font-weight: 600;
-    }
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
 
-    .detail-value {
-      font-size: 14px;
-      color: #1b5e20;
-      font-weight: 600;
-    }
-  }
+.detail-label {
+  font-size: 12px;
+  color: #388e3c;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #1b5e20;
+  font-weight: 600;
+}
 
   .product-actions {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
   }
+@media (max-width: 480px) {
+  .product-details {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+  
 `;
+
+
+
+
 
 export const DepartmentCard = styled(Card)`
   .department-header {
@@ -711,6 +730,178 @@ export const DepartmentCard = styled(Card)`
       border: 1px solid #ddd;
     }
   }
+/* Container principal */
+.linked-products-container {
+  margin-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 15px;
+}
+
+/* Cabeçalho */
+.linked-products-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.linked-products-header h4 {
+  margin: 0;
+  color: #1b5e20;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.count-badge {
+  background: #e8f5e9;
+  color: #1b5e20;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Lista de produtos */
+.linked-products-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+/* Item de produto */
+.linked-product-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.linked-product-item:hover {
+  background: #f1f8e9;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Informações principais */
+.product-main-info {
+  flex: 1;
+  min-width: 0; /* Isso é crucial para evitar cortes */
+  padding-right: 10px; /* Espaço entre o texto e os valores */
+}
+
+.product-name {
+  font-weight: 600;
+  color: #333;
+  display: block;
+  white-space: normal; /* Mudar de nowrap para normal */
+  overflow: visible; /* Mudar de hidden para visible */
+  text-overflow: clip; /* Remover ellipsis */
+  word-break: break-word; /* Quebrar palavras longas */
+  max-width: 100%; /* Garantir que não ultrapasse o container */
+}
+
+.product-code {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+  display: block;
+}
+
+/* Valores */
+.product-values {
+  display: flex;
+  gap: 15px;
+  margin: 0 15px;
+}
+
+.value-item {
+  text-align: right;
+}
+
+.value-label {
+  display: block;
+  font-size: 11px;
+  color: #666;
+}
+
+.value-amount {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1b5e20;
+}
+
+/* Botão de remover */
+.remove-button {
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.remove-button:hover {
+  transform: scale(1.1);
+  background: #ffebee;
+}
+
+/* Mensagem sem produtos */
+.no-products-message {
+  text-align: center;
+  padding: 15px;
+  color: #666;
+  font-size: 14px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+/* Ícone de lixeira (se estiver usando SVG) */
+.trash-icon {
+  width: 16px;
+  height: 16px;
+  color: #d32f2f;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .linked-product-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .product-values {
+    margin: 10px 0 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .remove-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-values {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .value-item {
+    text-align: left;
+  }
+}
+
+
   ` ;
 
 export const IconButton = styled.button`
@@ -1020,6 +1211,13 @@ export const ProductSelectionFooter = styled(ModalFooter)`
       margin-left: 5px;
     }
   }
+
 `;
+
+
+
+
+
+
 
 

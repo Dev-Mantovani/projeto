@@ -80,8 +80,8 @@ app.get("/produtos", async (req, res) => {
 
 // Rota para cadastrar os produtos 
 app.post("/produtos", async (req, res) => {
-  const { codigo, conta_financeira, descricao } = req.body;
-  const { data, error } = await supabase.from("produtos").insert([{ codigo, conta_financeira, descricao }]).single();
+  const { codigo, conta_financeira, descricao,produto_quantidade, valor_unitario, valor_total } = req.body;
+  const { data, error } = await supabase.from("produtos").insert([{ codigo, conta_financeira, descricao,produto_quantidade,valor_unitario,valor_total }]).single();
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json(data);
 });
@@ -89,11 +89,11 @@ app.post("/produtos", async (req, res) => {
 // Rota para update os produtos
 app.put("/produtos/:id", async (req, res) => {
   const { id } = req.params;
-  const { codigo, conta_financeira, descricao } = req.body;
+  const { codigo, conta_financeira, descricao,produto_quantidade, valor_unitario, valor_total } = req.body;
   
   const { data, error } = await supabase
     .from("produtos")
-    .update({ codigo, conta_financeira, descricao })
+    .update({ codigo, conta_financeira, descricao, produto_quantidade, valor_unitario, valor_total })
     .eq("id", id)
     .single();
 
@@ -114,8 +114,6 @@ app.delete("/produtos/:id", async (req, res) => {
 });
 
 
-
-// -------------------- Departamentos --------------------
 // Rota para cadastrar departamento
 app.post("/departamentos", async (req, res) => {
   const { cadastro_filial, cadastro_departamento,tipo_departamento, numero_serventes, previsto_total_ctr } = req.body;
