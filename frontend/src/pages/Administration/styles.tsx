@@ -232,15 +232,15 @@ export const Tabs = styled.div`
 
 export const TabButton = styled.button<{ active: boolean }>`
   padding: 15px 25px;
-  background: ${({ active }) => 
-    active 
-      ? "rgba(255, 255, 255, 0.98)" 
+  background: ${({ active }) =>
+    active
+      ? "rgba(255, 255, 255, 0.98)"
       : "rgba(255, 255, 255, 0.15)"
   };
   color: ${({ active }) => (active ? "#1b5e20" : "white")};
-  border: 1px solid ${({ active }) => 
-    active 
-      ? "#4caf50" 
+  border: 1px solid ${({ active }) =>
+    active
+      ? "#4caf50"
       : "rgba(255, 255, 255, 0.2)"
   };
   border-radius: 15px;
@@ -434,8 +434,8 @@ export const StatusBadge = styled.span<{ status: string }>`
     status === "Enviado"
       ? "linear-gradient(135deg, #2d7d32, #4caf50)"
       : status === "Pendente"
-      ? "linear-gradient(135deg, #f57c00, #ff9800)"
-      : "linear-gradient(135deg, #616161, #757575)"};
+        ? "linear-gradient(135deg, #f57c00, #ff9800)"
+        : "linear-gradient(135deg, #616161, #757575)"};
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
@@ -549,11 +549,12 @@ export const Card = styled.div`
 `;
 
 export const ProductCard = styled(Card)`
+  
   .product-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
 
     .product-icon {
       font-size: 32px;
@@ -567,8 +568,8 @@ export const ProductCard = styled(Card)`
       background: #e8f5e8;
       padding: 6px 12px;
       border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 500;
       color: #1b5e20;
     }
   }
@@ -581,13 +582,10 @@ export const ProductCard = styled(Card)`
   }
 
  .product-details {
+  margin: 15px 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-  padding: 12px;
-  background: #f1f8e9;
-  border-radius: 8px;
-  margin-bottom: 15px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .detail-item {
@@ -605,20 +603,73 @@ export const ProductCard = styled(Card)`
 .detail-value {
   font-size: 14px;
   color: #1b5e20;
-  font-weight: 600;
+  font-weight: 500;
 }
 
-  .product-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-  }
+ .product-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
 @media (max-width: 480px) {
   .product-details {
     grid-template-columns: 1fr 1fr;
   }
 }
+.product-description-container {
+  margin: 10px 0;
+}
 
+.product-description {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.4;
+  transition: all 0.3s ease;
+}
+
+.product-description.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-description.expanded {
+  display: block;
+}
+
+.toggle-description-btn {
+  background: none;
+  border: none;
+  color: #1b5e20;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.toggle-description-btn:hover {
+  text-decoration: underline;
+}
+
+.chevron {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.chevron.down {
+  transform: rotate(0deg);
+}
+
+.chevron.up {
+  transform: rotate(180deg);
+}
 
   
 `;
@@ -775,14 +826,14 @@ export const DepartmentCard = styled(Card)`
 /* Item de produto */
 .linked-product-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 12px;
   background: #f8f8f8;
   border-radius: 8px;
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
+  gap: 8px;
 }
 
 .linked-product-item:hover {
@@ -798,22 +849,35 @@ export const DepartmentCard = styled(Card)`
   padding-right: 10px; /* Espaço entre o texto e os valores */
 }
 
+/* Informações superiores */
+.product-top-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 4px;
+}
+/* Seção inferior */
+.product-bottom-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+}
+
 .product-name {
   font-weight: 600;
   color: #333;
-  display: block;
-  white-space: normal; /* Mudar de nowrap para normal */
-  overflow: visible; /* Mudar de hidden para visible */
-  text-overflow: clip; /* Remover ellipsis */
-  word-break: break-word; /* Quebrar palavras longas */
-  max-width: 100%; /* Garantir que não ultrapasse o container */
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
 }
 
 .product-code {
-  font-size: 12px;
-  color: #666;
-  margin-top: 2px;
-  display: block;
+  font-size: 15px;
+  color:#1b5e20;
+  margin-bottom: 7px;
+ font-weight: bold
 }
 
 /* Valores */
@@ -834,10 +898,11 @@ export const DepartmentCard = styled(Card)`
 }
 
 .value-amount {
-  display: block;
+  display: flex;
   font-size: 13px;
   font-weight: 600;
   color: #1b5e20;
+    justify-content: space-around;
 }
 
 /* Botão de remover */
@@ -867,6 +932,67 @@ export const DepartmentCard = styled(Card)`
   width: 16px;
   height: 16px;
   color: #d32f2f;
+}
+/* Container da descrição */
+.product-description-container {
+  position: relative;
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* Estilo da descrição */
+.product-description {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.4;
+  transition: all 0.3s ease;
+}
+
+/* Descrição recolhida */
+.product-description.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Descrição expandida */
+.product-description.expanded {
+  display: block;
+}
+
+/* Botão para expandir/recolher */
+.toggle-description-btn {
+  background: none;
+  border: none;
+  color: #1b5e20;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.toggle-description-btn:hover {
+  text-decoration: underline;
+}
+
+/* Ícone do botão */
+.chevron {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.chevron.down {
+  transform: rotate(0deg);
+}
+
+.chevron.up {
+  transform: rotate(180deg);
 }
 
 /* Responsividade */
@@ -1131,8 +1257,8 @@ export const ProductIcon = styled.div<{ selected: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${({ selected }) => 
-    selected 
+  background: ${({ selected }) =>
+    selected
       ? 'linear-gradient(135deg, #2d7d32, #4CAF50)'
       : 'linear-gradient(135deg, #e8f5e9, #c8e6c9)'};
   color: ${({ selected }) => (selected ? 'white' : '#388e3c')};
@@ -1211,6 +1337,9 @@ export const ProductSelectionFooter = styled(ModalFooter)`
       margin-left: 5px;
     }
   }
+
+
+  
 
 `;
 

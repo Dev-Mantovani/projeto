@@ -37,12 +37,10 @@ import {
   ProductIcon,
   ProductInfo,
   SelectionIndicator,
-  ConfettiEffect,
   ProductSelectionFooter
 } from "./styles";
 
 import { dashboardApi } from "../../services/api";
-import { data } from "react-router";
 import * as XLSX from 'xlsx';
 
 const Dashboard: React.FC = () => {
@@ -57,7 +55,8 @@ const Dashboard: React.FC = () => {
   const [produtosDisponiveis, setProdutosDisponiveis] = useState<any[]>([]);
   const [produtosSelecionados, setProdutosSelecionados] = useState<number[]>([]);
   const [produtosPorDepartamento, setProdutosPorDepartamento] = useState<{ [key: number]: any[] }>({});
-  const [expandedDepartamentos, setExpandedDepartamentos] = useState<Record<number, boolean>>({});
+
+
 
   // Estados dos dados
   const [tabelaData, setTabelaData] = useState<any[]>([]);
@@ -67,10 +66,10 @@ const Dashboard: React.FC = () => {
 
   // Estados dos filtros
   const [filtros, setFiltros] = useState({
-    periodo: "todos",
     filial: "todas",
     departamento: "todos",
     tipo_departamento: "todos",
+    competencia: "todos",
     status: "todos"
   });
 
@@ -86,6 +85,7 @@ const Dashboard: React.FC = () => {
     codigo: "",
     conta_financeira: "",
     descricao: "",
+    descricao_ctr: "",
     produto_quantidade: 0,
     valor_unitario: 0,
     valor_total: 0
@@ -95,6 +95,7 @@ const Dashboard: React.FC = () => {
     cadastro_filial: "",
     cadastro_departamento: "",
     tipo_departamento: "",
+    competencia: "",
     numero_serventes: "",
     previsto_total_ctr: ""
 
@@ -130,9 +131,11 @@ const Dashboard: React.FC = () => {
       // ------------------ DADOS CONSOLIDADOS -------------- Integrar dados de departamento na tabela consolidada
       const dadosIntegrados = dadosConsolidados.map((item: any) => {
         const departamento = departamentosList.find((d: any) =>
+          d.competencia === item.competencia &&
           d.cadastro_filial === item.cadastro_filial &&
           d.cadastro_departamento === item.cadastro_departamento &&
           d.tipo_departamento == item.tipo_departamento
+
         );
 
         return {
@@ -149,6 +152,7 @@ const Dashboard: React.FC = () => {
           filial: dept.cadastro_filial,
           data_base: 0,
           servente_realizado: 0,
+          competencia: dept.competencia,
           cadastro_filial: dept.cadastro_filial,
           cadastro_departamento: dept.cadastro_departamento,
           tipo_departamento: dept.tipo_departamento,
@@ -185,12 +189,13 @@ const Dashboard: React.FC = () => {
     return tabelaData.filter(item => {
       // Filtro de período (exemplo simplificado)
       let periodoMatch = true;
-      if (filtros.periodo !== "todos") {
-        // Implemente sua lógica de período aqui
-        // Exemplo: filtrar por data atual/anterior
-      }
 
       // Filtros existentes
+
+      const competenciaMatch = filtros.competencia === "todos" ||
+        item.competencia === filtros.competencia
+
+
       const filialMatch = filtros.filial === "todas" ||
         item.filial === filtros.filial ||
         item.cadastro_filial === filtros.filial;
@@ -208,12 +213,13 @@ const Dashboard: React.FC = () => {
       const statusMatch = filtros.status === "todos" || item.status === filtros.status;
 
       const searchMatch = searchTerm === "" ||
+        (item.competencia || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.filial || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.cadastro_filial || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.cadastro_departamento || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.tipo_departamento || "").toLowerCase().includes(searchTerm.toLowerCase());
 
-      return periodoMatch && filialMatch && departamentoMatch && statusMatch && tipoMatch && searchMatch;
+      return periodoMatch && filialMatch && departamentoMatch && statusMatch && tipoMatch && competenciaMatch && searchMatch;
 
 
 
@@ -234,7 +240,7 @@ const Dashboard: React.FC = () => {
 
   // -------------------------Cadastrar Produto------------------
   const salvarProduto = async () => {
-    if (!produtoForm.codigo || !produtoForm.conta_financeira || !produtoForm.descricao || !produtoForm.produto_quantidade || !produtoForm.valor_unitario || !produtoForm.valor_total) {
+    if (!produtoForm.codigo || !produtoForm.conta_financeira || !produtoForm.descricao || !produtoForm.descricao_ctr) {
       alert("Preencha todos os campos obrigatórios");
       return;
     }
@@ -255,7 +261,7 @@ const Dashboard: React.FC = () => {
         carregarProdutosDisponiveis() // Recarrega os produtos disponíveis para associação
       ]);
 
-      setProdutoForm({ codigo: "", conta_financeira: "", descricao: "", produto_quantidade: 0, valor_unitario: 0, valor_total: 0 });
+      setProdutoForm({ codigo: "", conta_financeira: "", descricao: "", descricao_ctr: "", produto_quantidade: 0, valor_unitario: 0, valor_total: 0 });
       setEditandoId(null);
       setShowProdutoModal(false);
     } catch (error) {
@@ -290,6 +296,7 @@ const Dashboard: React.FC = () => {
       departamentoForm.cadastro_filial,
       departamentoForm.cadastro_departamento,
       departamentoForm.tipo_departamento,
+      departamentoForm.competencia,
       departamentoForm.numero_serventes,
       departamentoForm.previsto_total_ctr
     ];
@@ -305,6 +312,7 @@ const Dashboard: React.FC = () => {
         cadastro_filial: departamentoForm.cadastro_filial,
         cadastro_departamento: departamentoForm.cadastro_departamento,
         tipo_departamento: departamentoForm.tipo_departamento,
+        competencia: departamentoForm.competencia,
         numero_serventes: Number(departamentoForm.numero_serventes),
         previsto_total_ctr: Number(departamentoForm.previsto_total_ctr)
       };
@@ -322,6 +330,7 @@ const Dashboard: React.FC = () => {
         cadastro_filial: "",
         cadastro_departamento: "",
         tipo_departamento: "",
+        competencia: "",
         numero_serventes: "",
         previsto_total_ctr: ""
       });
@@ -375,6 +384,7 @@ const Dashboard: React.FC = () => {
       Filial: item.filial || item.cadastro_filial,
       Departamento: item.cadastro_departamento,
       Tipo: item.tipo_departamento,
+      Competencia: item.competencia,
       'Data Base': item.data_base ? `R$ ${Number(item.data_base).toFixed(2)}` : '',
       'Nº Serventes': item.numero_serventes,
       'Previsto Per Capita': item.previsto_per_capita ? `R$ ${Number(item.previsto_per_capita).toFixed(2)}` : '',
@@ -413,10 +423,16 @@ const Dashboard: React.FC = () => {
       }));
     }
   };
+
   const carregarProdutosDisponiveis = async () => {
     try {
       const produtos = await dashboardApi.getProdutos();
-      setProdutosDisponiveis(produtos || []);
+      // Adiciona a propriedade showFullDescription a cada produto
+      const produtosComEstado = produtos.map(produto => ({
+        ...produto,
+        showFullDescription: false // Valor inicial
+      }));
+      setProdutosDisponiveis(produtosComEstado || []);
     } catch (error) {
       console.error("Erro ao carregar produtos disponíveis:", error);
       setProdutosDisponiveis([]);
@@ -494,14 +510,26 @@ const Dashboard: React.FC = () => {
     }
   }, [departamentos]);
 
-  // Vizualização dos Produtos no Departamento // 
 
-  const toggleExpandDepartamento = (departamentoId: number) => {
-  setExpandedDepartamentos(prev => ({
-    ...prev,
-    [departamentoId]: !prev[departamentoId]
-  }));
-};
+
+  // Expansão de descricao_ctr ///
+
+
+  const toggleDescription = (departamentoId: number, produtoId: number) => {
+    setProdutosPorDepartamento(prev => {
+      const newState = { ...prev };
+      if (newState[departamentoId]) {
+        newState[departamentoId] = newState[departamentoId].map(produto => {
+          if (produto.id === produtoId) {
+            return { ...produto, showFullDescription: !produto.showFullDescription };
+          }
+          return produto;
+        });
+      }
+      return newState;
+    });
+  };
+
 
 
   if (loading && tabelaData.length === 0) {
@@ -563,15 +591,27 @@ const Dashboard: React.FC = () => {
 
       {/* Filtros */}
       <FiltersContainer>
+
         <FilterGroup>
-          <label>📅 Período</label>
+          <label>📅 Competencia</label>
           <select
-            value={filtros.periodo}
-            onChange={(e) => setFiltros({ ...filtros, periodo: e.target.value })}
+            value={filtros.competencia}
+            onChange={(e) => setFiltros({ ...filtros, competencia: e.target.value })}
           >
-            <option value="todos">Todos os períodes</option>
-            <option value="atual">Mês atual</option>
-            <option value="anterior">Mês anterior</option>
+            <option value="todos">Todas as competências</option>
+
+            {[...new Set(tabelaData.map(item => item.competencia))].map((competencia) => {
+              const data = new Date(competencia); // transforma string em Date
+              const mes = String(data.getMonth() + 1).padStart(2, "0"); // mês sempre com 2 dígitos
+              const ano = data.getFullYear();
+              const competenciaFormatada = `${mes}/${ano}`;
+
+              return (
+                <option key={competencia} value={competencia}>
+                  {competenciaFormatada}
+                </option>
+              );
+            })}
           </select>
         </FilterGroup>
         <FilterGroup>
@@ -627,7 +667,7 @@ const Dashboard: React.FC = () => {
       {/* Abas */}
       <Tabs>
         <TabButton active={activeTab === "tabela"} onClick={() => setActiveTab("tabela")}>
-          📊 Tabela Consolidada
+          📊 Tabela Consolidada ( Pedido Mensal)
         </TabButton>
 
         <TabButton active={activeTab === "produtos"} onClick={() => setActiveTab("produtos")}>
@@ -678,6 +718,7 @@ const Dashboard: React.FC = () => {
               <Table>
                 <thead>
                   <tr>
+                    <th>Competencia</th>
                     <th>Filial</th>
                     <th>Departamento</th>
                     <th>Tipo</th>
@@ -696,6 +737,17 @@ const Dashboard: React.FC = () => {
                 <tbody>
                   {dadosFiltrados.map((row, index) => (
                     <tr key={`${row.cadastro_filial}-${row.cadastro_departamento}-${index}`}>
+                      <td data-label="Competencia">
+                        <strong>
+                          {(() => {
+                            const data = new Date(row.competencia);
+                            const mes = String(data.getMonth() + 1).padStart(2, "0");
+                            const ano = data.getFullYear();
+                            return `${mes}/${ano}`;
+                          })()}
+                        </strong>
+
+                      </td>
                       <td data-label="Filial">
                         <strong>{row.filial || row.cadastro_filial}</strong>
                       </td>
@@ -760,6 +812,22 @@ const Dashboard: React.FC = () => {
                 <div className="product-code">{produto.codigo}</div>
               </div>
               <h3>{produto.descricao}</h3>
+
+              {/* Área da descrição expansível */}
+              <div className="product-description-container">
+                <div className={`product-description ${produto.showFullDescription ? 'expanded' : 'collapsed'}`}>
+                  {produto.descricao_ctr}
+                </div>
+                {produto.descricao_ctr?.length > 100 && (
+                  <button
+                    className="toggle-description-btn"
+                  >
+
+                  </button>
+
+                )}
+              </div>
+
               <div className="product-details">
                 <div className="detail-item">
                   <span className="detail-label">Conta Financeira</span>
@@ -793,6 +861,7 @@ const Dashboard: React.FC = () => {
                       codigo: produto.codigo,
                       conta_financeira: produto.conta_financeira,
                       descricao: produto.descricao,
+                      descricao_ctr: produto.descricao_ctr,
                       produto_quantidade: produto.produto_quantidade,
                       valor_unitario: produto.valor_unitario,
                       valor_total: produto.valor_total
@@ -810,6 +879,7 @@ const Dashboard: React.FC = () => {
                 >
                   🗑️
                 </IconButton>
+
               </div>
             </ProductCard>
           ))}
@@ -853,6 +923,7 @@ const Dashboard: React.FC = () => {
                       cadastro_filial: departamento.cadastro_filial,
                       cadastro_departamento: departamento.cadastro_departamento,
                       tipo_departamento: departamento.tipo_departamento,
+                      competencia: departamento.competencia,
                       numero_serventes: departamento.numero_serventes,
                       previsto_total_ctr: departamento.previsto_total_ctr
                     });
@@ -893,27 +964,47 @@ const Dashboard: React.FC = () => {
                     <ul className="linked-products-list">
                       {produtosPorDepartamento[departamento.id].map(produto => (
                         <li key={produto.id} className="linked-product-item">
-                          <div className="product-main-info">
-                            <span className="product-name">{produto.descricao}</span>
+                          <div className="product-top-info">
                             <span className="product-code">{produto.codigo}</span>
-                          </div>
-                          <div className="product-values">
-                            <div className="value-item">
-                              <span className="value-label">Unitário:</span>
-                              <span className="value-amount">{produto.valor_unitario ? `R$ ${Number(produto.valor_unitario).toFixed(2)}` : 'R$ 0,00'}</span>
+                            <span className="product-name">{produto.descricao}</span>
+                            <div className="product-description-container">
+                              <div className={`product-description ${produto.showFullDescription ? 'expanded' : 'collapsed'}`}>
+                                {produto.descricao_ctr}
+                              </div>
+                              {produto.descricao_ctr?.length > 100 && (
+                                <button
+                                  className="toggle-description-btn"
+                                  onClick={() => toggleDescription(departamento.id, produto.id)}
+                                >
+                                  {produto.showFullDescription ? 'Mostrar menos' : 'Mostrar mais'}
+                                  <span className={`chevron ${produto.showFullDescription ? 'up' : 'down'}`}>▼</span>
+                                </button>
+                              )}
                             </div>
-                            <div className="value-item">
-                              <span className="value-label">Total:</span>
-                              <span className="value-amount">{produto.valor_total ? `R$ ${Number(produto.valor_total).toFixed(2)}` : 'R$ 0,00'}</span>
-                            </div>
                           </div>
-                          <IconButton
-                            className="danger remove-button"
-                            onClick={() => removerProdutoDepartamento(departamento.id, produto.id)}
-                            title="Remover produto"
-                          >
-                          🗑️
-                          </IconButton>
+                          <div className="product-bottom-section">
+                            <div className="product-values">
+                              <div className="value-item">
+                                <span className="value-label">Quantidade:</span>
+                                <span className="value-amount">{produto.produto_quantidade} </span>
+                              </div>
+                              <div className="value-item">
+                                <span className="value-label">Unitário:</span>
+                                <span className="value-amount">{produto.valor_unitario ? `R$ ${Number(produto.valor_unitario).toFixed(2)}` : 'R$ 0,00'}</span>
+                              </div>
+                              <div className="value-item">
+                                <span className="value-label">Total:</span>
+                                <span className="value-amount">{produto.valor_total ? `R$ ${Number(produto.valor_total).toFixed(2)}` : 'R$ 0,00'}</span>
+                              </div>
+                            </div>
+                            <IconButton
+                              className="danger remove-button"
+                              onClick={() => removerProdutoDepartamento(departamento.id, produto.id)}
+                              title="Remover produto"
+                            >
+                              🗑️
+                            </IconButton>
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -935,7 +1026,7 @@ const Dashboard: React.FC = () => {
         <Modal onClick={() => {
           setShowProdutoModal(false);
           setEditandoId(null);
-          setProdutoForm({ codigo: "", conta_financeira: "", descricao: "", produto_quantidade: 0, valor_unitario: 0, valor_total: 0 });
+          setProdutoForm({ codigo: "", conta_financeira: "", descricao: "", descricao_ctr: "", produto_quantidade: 0, valor_unitario: 0, valor_total: 0 });
         }}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalHeader>
@@ -968,7 +1059,15 @@ const Dashboard: React.FC = () => {
                 />
               </FormGroup>
               <FormGroup>
-                <label>Quantidade *</label>
+                <label>Descrição (<span>Contrato</span>)</label>
+                <Input
+                  value={produtoForm.descricao_ctr}
+                  onChange={(e) => setProdutoForm({ ...produtoForm, descricao_ctr: e.target.value })}
+                  placeholder="Digite a descrição do produto (Contrato)"
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Quantidade</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -981,7 +1080,7 @@ const Dashboard: React.FC = () => {
                 />
               </FormGroup>
               <FormGroup>
-                <label>Valor Unitário *</label>
+                <label>Valor Unitário</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -994,7 +1093,7 @@ const Dashboard: React.FC = () => {
                 />
               </FormGroup>
               <FormGroup>
-                <label>Valor Total *</label>
+                <label>Valor Total</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -1031,6 +1130,7 @@ const Dashboard: React.FC = () => {
             cadastro_filial: "",
             cadastro_departamento: "",
             tipo_departamento: "",
+            competencia: "",
             numero_serventes: "",
             previsto_total_ctr: ""
 
@@ -1064,6 +1164,15 @@ const Dashboard: React.FC = () => {
                   value={departamentoForm.tipo_departamento}
                   onChange={(e) => setDepartamentoForm({ ...departamentoForm, tipo_departamento: e.target.value })}
                   placeholder="Digite o tipo do departamento"
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Competencia *</label>
+                <Input
+                  value={departamentoForm.competencia}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm, competencia: e.target.value })}
+                  placeholder="Competencia"
+                  type="date"
                 />
               </FormGroup>
 
@@ -1135,6 +1244,7 @@ const Dashboard: React.FC = () => {
 
                       <ProductInfo>
                         <h3>{produto.descricao}</h3>
+                        <h3>{produto.descricao_ctr}</h3>
                         <p> Descrição: {produto.codigo}</p>
                         <p> Conta: {produto.conta_financeira}</p>
                         <p> Quantidade: {produto.produto_quantidade}</p>
@@ -1167,7 +1277,7 @@ const Dashboard: React.FC = () => {
       <FloatingActionButton
         onClick={() => {
           if (activeTab === "produtos") {
-            setProdutoForm({ codigo: "", conta_financeira: "", descricao: "", produto_quantidade: 0, valor_unitario: 0, valor_total: 0 });
+            setProdutoForm({ codigo: "", conta_financeira: "", descricao: "", descricao_ctr: "", produto_quantidade: 0, valor_unitario: 0, valor_total: 0 });
             setEditandoId(null);
             setShowProdutoModal(true);
           }
@@ -1176,6 +1286,7 @@ const Dashboard: React.FC = () => {
               cadastro_filial: "",
               cadastro_departamento: "",
               tipo_departamento: "",
+              competencia: "",
               numero_serventes: "",
               previsto_total_ctr: ""
             });

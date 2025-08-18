@@ -116,7 +116,13 @@ getProdutosPorDepartamento: async (departamentoId: number) => {
     const { data } = await api.delete(`/departamentos/${departamentoId}/produtos/${produtoId}`);
     return data;
   }
+
+  ///-------------------------------- PAGE 2------------------------------- // 
+
 };
+
+
+
 
 
 
