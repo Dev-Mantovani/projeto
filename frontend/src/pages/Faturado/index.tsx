@@ -1,347 +1,453 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Header,
+  FiltersContainer,
+  FilterGroup,
+  TableContainer,
+  Table,
+  Button,
+  MetricsGrid,
+  MetricCard,
+  SearchBar,
+  EmptyState,
+  LoadingSpinner,
+  ResponsiveTable,
+  Input
+} from "./styles";
 import { dashboardApi } from "../../services/api";
-import * as S from './styles';
+import * as XLSX from 'xlsx';
 
 interface Departamento {
-    id: number;
-    cadastro_filial: string;
-    cadastro_departamento: string;
-    tipo_departamento: string;
-    competencia: string;
-    numero_serventes: number;
-    previsto_total_ctr: number;
+  id: number;
+  cadastro_filial: string;
+  cadastro_departamento: string;
+  tipo_departamento: string;
+  competencia: string;
+  numero_serventes: number;
+  previsto_total_ctr: number;
+  acumulado_total: number;
 }
 
-interface ProdutoDepartamento {
+interface Produto {
   id: number;
-  produto_id: number;
-  departamento_id: number;
+  codigo: string;
+  descricao: string;
+  descricao_ctr: string;
   produto_quantidade: number;
   valor_unitario: number;
   valor_total: number;
-  produto?: {  // Tornando produto opcional
-    codigo?: string;
-    descricao?: string;
-    descricao_ctr?: string;
-  };
+  departamento_id?: number;
 }
 
-interface ProdutoVinculado {
-  id: number;
-  departamento_id: number;
-  produto_id: number;
-  created_at: string;
-  produto?: {  // Dados do produto que vamos carregar
-    id: number;
-    codigo: string;
-    descricao: string;
-    descricao_ctr?: string;
-    produto_quantidade?: number;
-    valor_unitario?: number;
-    valor_total?: number;
-  };
-}
+const Dashboard: React.FC = () => {
+  // Estados
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [departamentosExpandidos, setDepartamentosExpandidos] = useState<number[]>([]);
+  const [carregandoProdutos, setCarregandoProdutos] = useState<number | null>(null);
+  const [filtroFilial, setFiltroFilial] = useState("todas");
+  const [filtroDepartamento, setFiltroDepartamento] = useState("todos");
+  const [editandoProduto, setEditandoProduto] = useState<number | null>(null);
 
-const RelatorioPage: React.FC = () => {
-    const [filiais, setFiliais] = useState<string[]>([]);
-    const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
-    const [produtosPorDepartamento, setProdutosPorDepartamento] = useState<{ [key: number]: ProdutoDepartamento[] }>({});
-    const [loading, setLoading] = useState(true);
-
-    // Filtros selecionados
-    const [filtros, setFiltros] = useState({
-        filial: '',
-        tipo: '',
-        competencia: ''
-    });
-
-    // Dados para preenchimento
-    const [dadosPreenchimento, setDadosPreenchimento] = useState({
-        serventesRealizado: '',
-        realizadoPerCapita: '',
-        realizadoTotal: '',
-        ordemCompra: ''
-    });
-
-    // Carrega dados iniciais
+  // Carregar dados iniciais
   useEffect(() => {
+    carregarDados();
+  }, []);
+
   const carregarDados = async () => {
-    setLoading(true);
     try {
-      // Carrega departamentos
-      const departamentosData = await dashboardApi.getDepartamentos();
-      setDepartamentos(departamentosData);
+      const [departamentosData, produtosData] = await Promise.all([
+        dashboardApi.getDepartamentos(),
+        dashboardApi.getProdutos()
+      ]);
 
-      // Extrai filiais únicas
-      const filiaisUnicas = [...new Set(
-        departamentosData.map(d => d.cadastro_filial).filter(Boolean)
-      )];
-      setFiliais(filiaisUnicas);
-
-      // Carrega produtos apenas para os departamentos filtrados inicialmente
-      const initialDepts = departamentosData.slice(0, 3); // Carrega apenas os 3 primeiros para não sobrecarregar
-      await Promise.all(
-        initialDepts.map(dept => carregarProdutosDepartamento(dept.id))
-      );
-
+      setDepartamentos(departamentosData || []);
+      setProdutos(produtosData || []);
     } catch (error) {
-      console.error('Erro ao carregar dados:', error);
+      console.error("Erro ao carregar dados:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  carregarDados();
-}, []);
+  // Filtrar departamentos
+  const departamentosFiltrados = departamentos.filter(depto => {
+    const filialMatch = filtroFilial === "todas" || depto.cadastro_filial === filtroFilial;
+    const departamentoMatch = filtroDepartamento === "todos" || depto.cadastro_departamento === filtroDepartamento;
+    const searchMatch = searchTerm === "" || 
+      depto.cadastro_filial.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      depto.cadastro_departamento.toLowerCase().includes(searchTerm.toLowerCase());
 
-// Carregar Produto X Departamento // 
+    return filialMatch && departamentoMatch && searchMatch;
+  });
 
+  // Calcular acumulado total (soma de todos os produtos)
+  const acumuladoTotal = produtos.reduce((total, produto) => total + (produto.valor_total || 0), 0);
 
-    const carregarProdutosDepartamento = async (departamentoId: number) => {
-  try {
-    // 1. Primeiro pega os vínculos
-    const vinculos = await dashboardApi.getProdutosPorDepartamento(departamentoId);
-    
-    // 2. Depois pega os detalhes de cada produto
-    const produtosCompletos = await Promise.all(
-      vinculos.map(async (vinculo) => {
-        const produto = await dashboardApi.getProdutos(vinculo.produto_id);
-        return {
-          ...vinculo,
-          produto: produto || null
-        };
-      })
-    );
-    
-    setProdutosPorDepartamento(prev => ({
-      ...prev,
-      [departamentoId]: produtosCompletos
-    }));
-    
-  } catch (error) {
-    console.error(`Erro ao carregar produtos do departamento ${departamentoId}:`, error);
-  }
-};
+  // Calcular métricas
+  const metricas = {
+    totalFiliais: new Set(departamentosFiltrados.map(d => d.cadastro_filial)).size,
+    totalServentes: departamentosFiltrados.reduce((acc, d) => acc + (d.numero_serventes || 0), 0),
+    previstoTotal: departamentosFiltrados.reduce((acc, d) => acc + (d.previsto_total_ctr || 0), 0),
+    realizadoTotal: acumuladoTotal
+  };
 
-    // Filtra departamentos com base nas seleções
-    const departamentosFiltrados = departamentos.filter(dept => {
-        return (
-            (filtros.filial === '' || dept.cadastro_filial === filtros.filial) &&
-            (filtros.tipo === '' || dept.tipo_departamento === filtros.tipo) &&
-            (filtros.competencia === '' || dept.competencia === filtros.competencia)
-        );
-    });
-
-    // Competências disponíveis para o tipo selecionado
-    const competenciasDisponiveis = [...new Set(
-        departamentos
-            .filter(d => d.tipo_departamento === filtros.tipo)
-            .map(d => d.competencia)
-    )];
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setDadosPreenchimento(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            // Implemente a lógica de salvamento conforme sua necessidade
-            // Exemplo: await dashboardApi.updateDepartamento(...)
-            alert('Dados salvos com sucesso!');
-        } catch (error) {
-            console.error('Erro ao salvar dados:', error);
-            alert('Erro ao salvar dados');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    
-    
-
-    if (loading) {
-        return <S.LoadingSpinner>Carregando...</S.LoadingSpinner>;
+  // Expandir/recolher departamento
+  const toggleDepartamento = async (departamentoId: number) => {
+    if (departamentosExpandidos.includes(departamentoId)) {
+      setDepartamentosExpandidos(departamentosExpandidos.filter(id => id !== departamentoId));
+      return;
     }
 
-    return (
-        <S.Container>
-            <S.Header>
-                <h1>Relatório de Departamentos</h1>
-                <p>Preencha os filtros para visualizar os dados</p>
-            </S.Header>
-
-            <S.FiltersContainer>
-                <S.FilterGroup>
-                    <label>Filial</label>
-                    <select
-                        value={filtros.filial}
-                        onChange={(e) => setFiltros({ ...filtros, filial: e.target.value })}
-                    >
-                        <option value="">Selecione uma filial</option>
-                        {filiais.map(filial => (
-                            <option key={filial} value={filial}>{filial}</option>
-                        ))}
-                    </select>
-                </S.FilterGroup>
-
-                <S.FilterGroup>
-                    <label>Tipo de Departamento</label>
-                    <select
-                        value={filtros.tipo}
-                        onChange={(e) => setFiltros({ ...filtros, tipo: e.target.value, competencia: '' })}
-                    >
-                        <option value="">Selecione um tipo</option>
-                        <option value="Faturado">Faturado</option>
-                        <option value="Pedido Mensal">Pedido Mensal</option>
-                    </select>
-                </S.FilterGroup>
-
-                {filtros.tipo && (
-                    <S.FilterGroup>
-                        <label>Competência</label>
-                        <select
-                            value={filtros.competencia}
-                            onChange={(e) => setFiltros({ ...filtros, competencia: e.target.value })}
-                        >
-                            <option value="">Selecione uma competência</option>
-                            {competenciasDisponiveis.map(comp => (
-                                <option key={comp} value={comp}>{comp}</option>
-                            ))}
-                        </select>
-                    </S.FilterGroup>
-                )}
-            </S.FiltersContainer>
-
-            {departamentosFiltrados.length > 0 && (
-                <>
-                    <S.TableContainer>
-                        <S.Table>
-                            <thead>
-                                <tr>
-                                    <th>Filial</th>
-                                    <th>Departamento</th>
-                                    <th>Tipo</th>
-                                    <th>Competência</th>
-                                    <th>Nº Serventes</th>
-                                    <th>Valor Estimado</th>
-                                    <th>Nº Serventes Realizado</th>
-                                    <th>Realizado per capita</th>
-                                    <th>Realizado Total</th>
-                                    <th>Ordem de Compra</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {departamentosFiltrados.map((dept) => (
-                                    <tr key={dept.id}>
-                                        <td>{dept.cadastro_filial}</td>
-                                        <td>{dept.cadastro_departamento}</td>
-                                        <td>{dept.tipo_departamento}</td>
-                                        <td>{dept.competencia}</td>
-                                        <td>{dept.numero_serventes}</td>
-                                        <td>R$ {dept.previsto_total_ctr.toFixed(2)}</td>
-                                        <td>
-                                            <S.Input
-                                                type="number"
-                                                name="serventesRealizado"
-                                                value={dadosPreenchimento.serventesRealizado}
-                                                onChange={handleInputChange}
-                                            />
-                                        </td>
-                                        <td>
-                                            <S.Input
-                                                type="number"
-                                                step="0.01"
-                                                name="realizadoPerCapita"
-                                                value={dadosPreenchimento.realizadoPerCapita}
-                                                onChange={handleInputChange}
-                                            />
-                                        </td>
-                                        <td>
-                                            <S.Input
-                                                type="number"
-                                                step="0.01"
-                                                name="realizadoTotal"
-                                                value={dadosPreenchimento.realizadoTotal}
-                                                onChange={handleInputChange}
-                                            />
-                                        </td>
-                                        <td>
-                                            <S.Input
-                                                type="text"
-                                                name="ordemCompra"
-                                                value={dadosPreenchimento.ordemCompra}
-                                                onChange={handleInputChange}
-                                            />
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </S.Table>
-                    </S.TableContainer>
-
-                   
-                    {/* Lista de produtos vinculados */}
-{departamentosFiltrados.map(dept => {
-  const produtosDoDept = produtosPorDepartamento[dept.id] || [];
-  
-  return (
-    <S.ProductsSection key={`produtos-${dept.id}`}>
-      <h3>Produtos vinculados ao departamento: {dept.cadastro_departamento}</h3>
+    setCarregandoProdutos(departamentoId);
+    
+    try {
+      const produtosDepartamento = await dashboardApi.getProdutosPorDepartamento(departamentoId);
       
-      {produtosDoDept.length > 0 ? (
-        <S.ProductsGrid>
-          {produtosDoDept.map(prod => {
-            if (!prod.produto) return null; // Pula se não tiver produto
-            
-            return (
-              <S.ProductCard key={prod.id}>
-                <div className="product-code">{prod.produto.codigo || 'N/A'}</div>
-                <div className="product-name">{prod.produto.descricao}</div>
-                <div className="product-description">
-                  {prod.produto.descricao_ctr || 'Sem descrição adicional'}
-                </div>
-                <div className="product-values">
-                  <div>Qtd: {prod.produto.produto_quantidade || 0}</div>
-                  <div>Unit: R$ {prod.produto.valor_unitario?.toFixed(2) || '0.00'}</div>
-                  <div>Total: R$ {prod.produto.valor_total?.toFixed(2) || '0.00'}</div>
-                </div>
-              </S.ProductCard>
-            );
-          })}
-        </S.ProductsGrid>
-      ) : (
-        <S.EmptyState>
-          {produtosPorDepartamento[dept.id] === undefined 
-            ? 'Carregando produtos...' 
-            : 'Nenhum produto vinculado'}
-        </S.EmptyState>
-      )}
-    </S.ProductsSection>
-  );
-})}
+      const produtosAtualizados = produtos.map(produto => {
+        const produtoDoDepto = produtosDepartamento.find((p: any) => p.id === produto.id);
+        return produtoDoDepto ? { ...produto, departamento_id: departamentoId } : produto;
+      });
+      
+      setProdutos(produtosAtualizados);
+      setDepartamentosExpandidos([...departamentosExpandidos, departamentoId]);
+    } catch (error) {
+      console.error("Erro ao carregar produtos:", error);
+    }
+    
+    setCarregandoProdutos(null);
+  };
 
-                    <S.FormActions>
-                        <S.Button type="button" secondary>Cancelar</S.Button>
-                        <S.Button type="submit" onClick={handleSubmit} disabled={loading}>
-                            {loading ? 'Salvando...' : 'Salvar'}
-                        </S.Button>
-                    </S.FormActions>
-                </>
-            )}
+  // Obter produtos de um departamento
+  const getProdutosDepartamento = (departamentoId: number) => {
+    return produtos.filter(produto => produto.departamento_id === departamentoId);
+  };
 
-            {filtros.competencia && departamentosFiltrados.length === 0 && (
-                <S.EmptyState>
-                    Nenhum departamento encontrado para os filtros selecionados
-                </S.EmptyState>
-            )}
-        </S.Container>
+  // Calcular total de produtos de um departamento
+  const calcularTotalDepartamento = (departamentoId: number) => {
+    const produtosDepto = getProdutosDepartamento(departamentoId);
+    return produtosDepto.reduce((total, produto) => total + (produto.valor_total || 0), 0);
+  };
+
+  // Atualizar produto em tempo real
+  const atualizarProdutoLocal = (produtoId: number, campo: string, valor: number) => {
+    const novosProdutos = produtos.map(produto => {
+      if (produto.id === produtoId) {
+        const produtoAtualizado = { ...produto, [campo]: valor };
+        
+        // Calcular valor_total automaticamente
+        if (campo === 'produto_quantidade' || campo === 'valor_unitario') {
+          produtoAtualizado.valor_total = produtoAtualizado.produto_quantidade * produtoAtualizado.valor_unitario;
+        }
+        
+        return produtoAtualizado;
+      }
+      return produto;
+    });
+    
+    setProdutos(novosProdutos);
+  };
+
+  // Salvar produto no banco
+  const salvarProduto = async (produto: Produto) => {
+    try {
+      await dashboardApi.updateProduto(produto.id, produto);
+      setEditandoProduto(null);
+      // Recarregar dados para atualizar o acumulado_total no departamento
+      await carregarDados();
+    } catch (error) {
+      console.error("Erro ao salvar produto:", error);
+    }
+  };
+
+  // Adicionar novo produto
+  const adicionarProduto = async (departamentoId: number) => {
+    try {
+      const novoProduto = {
+        codigo: "NOVO",
+        descricao: "Novo Produto",
+        descricao_ctr: "Novo Produto CTR",
+        produto_quantidade: 1,
+        valor_unitario: 0,
+        valor_total: 0,
+        departamento_id: departamentoId
+      };
+
+      const produtoCriado = await dashboardApi.createProduto(novoProduto);
+      setProdutos([...produtos, produtoCriado]);
+      await carregarDados(); // Recarregar para atualizar acumulado_total
+    } catch (error) {
+      console.error("Erro ao adicionar produto:", error);
+    }
+  };
+
+  // Exportar para Excel
+  const exportarExcel = () => {
+    const dadosParaExportar = departamentosFiltrados.map(depto => ({
+      Filial: depto.cadastro_filial,
+      Departamento: depto.cadastro_departamento,
+      Tipo: depto.tipo_departamento,
+      Competencia: depto.competencia,
+      'Nº Serventes': depto.numero_serventes,
+      'Previsto Total CTR': depto.previsto_total_ctr || 0,
+      'Realizado Total': depto.acumulado_total || 0
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dadosParaExportar);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Departamentos");
+    XLSX.writeFile(workbook, `departamentos_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  // Formatar moeda - VERSÃO CORRIGIDA
+  const formatarMoeda = (valor: number | undefined | null): string => {
+    if (valor === undefined || valor === null || isNaN(valor)) {
+      return "R$ 0,00";
+    }
+    return `R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  };
+
+  if (loading) {
+    return (
+      <Container>
+        <LoadingSpinner />
+      </Container>
     );
+  }
+
+  return (
+    <Container>
+      <Header>
+        <div>
+          <h1>🏢 Central de Inteligência Operacional</h1>
+          <p>Gestão de Departamentos e Produtos</p>
+        </div>
+        <SearchBar>
+          <input
+            type="text"
+            placeholder="🔍 Pesquisar por filial ou departamento..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </SearchBar>
+      </Header>
+
+      {/* Métricas */}
+      <MetricsGrid>
+        <MetricCard>
+          <div className="metric-icon">🏪</div>
+          <div>
+            <h3>{metricas.totalFiliais}</h3>
+            <p>Filiais</p>
+          </div>
+        </MetricCard>
+        <MetricCard>
+          <div className="metric-icon">👥</div>
+          <div>
+            <h3>{metricas.totalServentes}</h3>
+            <p>Serventes</p>
+          </div>
+        </MetricCard>
+        <MetricCard>
+          <div className="metric-icon">📊</div>
+          <div>
+            <h3>{formatarMoeda(metricas.previstoTotal)}</h3>
+            <p>Previsto Total</p>
+          </div>
+        </MetricCard>
+        <MetricCard>
+          <div className="metric-icon">💰</div>
+          <div>
+            <h3>{formatarMoeda(metricas.realizadoTotal)}</h3>
+            <p>Realizado Total</p>
+          </div>
+        </MetricCard>
+      </MetricsGrid>
+
+      {/* Filtros */}
+      <FiltersContainer>
+        <FilterGroup>
+          <label>🏢 Filial</label>
+          <select value={filtroFilial} onChange={(e) => setFiltroFilial(e.target.value)}>
+            <option value="todas">Todas as filiais</option>
+            {Array.from(new Set(departamentos.map(d => d.cadastro_filial)))
+              .filter(Boolean)
+              .map(filial => (
+                <option key={filial} value={filial}>{filial}</option>
+              ))}
+          </select>
+        </FilterGroup>
+
+        <FilterGroup>
+          <label>🏛️ Departamento</label>
+          <select value={filtroDepartamento} onChange={(e) => setFiltroDepartamento(e.target.value)}>
+            <option value="todos">Todos os departamentos</option>
+            {Array.from(new Set(departamentos.map(d => d.cadastro_departamento)))
+              .filter(Boolean)
+              .map(depto => (
+                <option key={depto} value={depto}>{depto}</option>
+              ))}
+          </select>
+        </FilterGroup>
+      </FiltersContainer>
+
+      {/* Tabela */}
+      <TableContainer>
+        <div className="table-header">
+          <h2>📊 Departamentos - Acumulado Total: {formatarMoeda(acumuladoTotal)}</h2>
+          <div className="table-actions">
+            <span>{departamentosFiltrados.length} departamentos encontrados</span>
+            <Button onClick={exportarExcel}>📤 Exportar Excel</Button>
+          </div>
+        </div>
+
+        {departamentosFiltrados.length === 0 ? (
+          <EmptyState>
+            <div className="empty-icon">📊</div>
+            <h3>Nenhum departamento encontrado</h3>
+            <p>Tente ajustar os filtros de busca</p>
+          </EmptyState>
+        ) : (
+          <ResponsiveTable>
+            <Table>
+              <thead>
+                <tr>
+                  <th style={{ width: '40px' }}></th>
+                  <th>Competência</th>
+                  <th>Filial</th>
+                  <th>Departamento</th>
+                  <th>Serventes</th>
+                  <th>Previsto CTR</th>
+                  <th>Realizado</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {departamentosFiltrados.map((depto) => {
+                  const totalCalculado = calcularTotalDepartamento(depto.id);
+                  return (
+                    <React.Fragment key={depto.id}>
+                      {/* Linha do Departamento */}
+                      <tr 
+                        onClick={() => toggleDepartamento(depto.id)}
+                        style={{ 
+                          cursor: 'pointer', 
+                          backgroundColor: departamentosExpandidos.includes(depto.id) ? '#f5f5f5' : 'transparent' 
+                        }}
+                      >
+                        <td>
+                          {carregandoProdutos === depto.id ? (
+                            <LoadingSpinner />
+                          ) : (
+                            <span style={{ fontWeight: 'bold', fontSize: '14px' }}>
+                              {departamentosExpandidos.includes(depto.id) ? '▼' : '►'}
+                            </span>
+                          )}
+                        </td>
+                        <td>{depto.competencia}</td>
+                        <td><strong>{depto.cadastro_filial}</strong></td>
+                        <td><strong>{depto.cadastro_departamento}</strong></td>
+                        <td>{depto.numero_serventes || 0}</td>
+                        <td>{formatarMoeda(depto.previsto_total_ctr || 0)}</td>
+                        <td style={{ 
+                          color: (depto.acumulado_total || 0) > (depto.previsto_total_ctr || 0) ? 'green' : 'red',
+                          fontWeight: 'bold'
+                        }}>
+                          {formatarMoeda(depto.acumulado_total || 0)}
+                        </td>
+                     
+                      </tr>
+
+                      {/* Produtos do Departamento (se expandido) */}
+                      {departamentosExpandidos.includes(depto.id) && (
+                        <>
+                          {getProdutosDepartamento(depto.id).map((produto) => (
+                            <tr key={produto.id} style={{ backgroundColor: '#f9f9f9' }}>
+                              <td colSpan={2}></td>
+                              <td colSpan={2}>
+                                <div style={{ paddingLeft: '20px' }}>
+                                  <strong>{produto.descricao || produto.descricao_ctr}</strong>
+                                  <br />
+                                  <small>Código: {produto.codigo}</small>
+                                </div>
+                              </td>
+                              <td>
+                                {editandoProduto === produto.id ? (
+                                  <Input
+                                    type="number"
+                                    value={produto.produto_quantidade || 0}
+                                    onChange={(e) => atualizarProdutoLocal(produto.id, 'produto_quantidade', Number(e.target.value))}
+                                    style={{ width: '60px' }}
+                                  />
+                                ) : (
+                                  `Qtd: ${produto.produto_quantidade || 0}`
+                                )}
+                              </td>
+                              <td>
+                                {editandoProduto === produto.id ? (
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={produto.valor_unitario || 0}
+                                    onChange={(e) => atualizarProdutoLocal(produto.id, 'valor_unitario', Number(e.target.value))}
+                                    style={{ width: '80px' }}
+                                  />
+                                ) : (
+                                  `Unit: ${formatarMoeda(produto.valor_unitario || 0)}`
+                                )}
+                              </td>
+                              <td>
+                                <strong>Total: {formatarMoeda(produto.valor_total || 0)}</strong>
+                              </td>
+                              <td>
+                                {editandoProduto === produto.id ? (
+                                  <Button 
+                 
+                                    onClick={() => salvarProduto(produto)}
+                                  >
+                                    Salvar
+                                  </Button>
+                                ) : (
+                                  <Button 
+                                    
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditandoProduto(produto.id);
+                                    }}
+                                  >
+                                    Editar
+                                  </Button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                          
+                          {/* Total do Departamento */}
+                          {getProdutosDepartamento(depto.id).length > 0 && (
+                            <tr style={{ backgroundColor: '#e8f4f8', fontWeight: 'bold' }}>
+                              <td colSpan={5} style={{ textAlign: 'right' }}>
+                                Total Calculado: 
+                              </td>
+                              <td colSpan={3} style={{ color: 'green' }}>
+                                {formatarMoeda(totalCalculado)}
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </ResponsiveTable>
+        )}
+      </TableContainer>
+    </Container>
+  );
 };
 
-export default RelatorioPage;
+export default Dashboard;

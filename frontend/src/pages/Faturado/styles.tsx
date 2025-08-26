@@ -1,147 +1,1156 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const Container = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2d7d32 0%, #a8aca9 50%, #4caf50 100%);
   padding: 20px;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 `;
 
 export const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 30px;
-  
-  h1 {
-    color: #333;
-    margin-bottom: 5px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+  div {
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      color: white;
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    p {
+      margin: 5px 0 0 0;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 16px;
+    }
   }
-  
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+
+    div h1 {
+      font-size: 24px;
+    }
+  }
+`;
+
+export const SearchBar = styled.div`
+  input {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    width: 300px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    font-size: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 4px 20px rgba(45, 125, 50, 0.3);
+      transform: translateY(-2px);
+      border: 2px solid #4caf50;
+    }
+
+    &::placeholder {
+      color: #666;
+    }
+  }
+
+  @media (max-width: 768px) {
+    input {
+      width: 100%;
+      max-width: 300px;
+    }
+  }
+`;
+
+export const MetricsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+`;
+
+export const MetricCard = styled.div`
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 25px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(45, 125, 50, 0.2);
+    border-color: #4caf50;
+  }
+
+  .metric-icon {
+    font-size: 32px;
+    padding: 15px;
+    background: linear-gradient(135deg, #97ac99, #4caf50);
+    border-radius: 15px;
+    color: white;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1b5e20;
+  }
+
   p {
-    color: #666;
+    margin: 5px 0 0 0;
+    color: #388e3c;
+    font-size: 14px;
+    font-weight: 500;
+
+  }
+
+  @media (max-width: 768px) {
+    padding: 20px;
+    gap: 15px;
+
+    .metric-icon {
+      font-size: 28px;
+      padding: 12px;
+    }
+
+    h3 {
+      font-size: 20px;
+    }
   }
 `;
 
 export const FiltersContainer = styled.div`
   display: flex;
-  gap: 20px;
-  margin-bottom: 30px;
   flex-wrap: wrap;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  padding: 25px;
+  border-radius: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  @media (max-width: 768px) {
+    gap: 15px;
+    padding: 20px;
+  }
 `;
 
 export const FilterGroup = styled.div`
-  flex: 1;
+  display: flex;
+  flex-direction: column;
   min-width: 200px;
-  
+  flex: 1;
+
   label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #444;
-  }
-  
-  select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
     font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1b5e20;
+  }
+
+  select {
+    padding: 12px 16px;
+    border: 2px solid #e8f5e8;
+    border-radius: 12px;
+    font-size: 14px;
+    background: white;
+    color: #1b5e20;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+
+    &:hover {
+      border-color: #4caf50;
+    }
+  }
+
+  @media (max-width: 768px) {
+    min-width: 150px;
+  }
+`;
+
+export const Tabs = styled.div`
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
+`;
+
+export const TabButton = styled.button<{ active: boolean }>`
+  padding: 15px 25px;
+  background: ${({ active }) =>
+    active
+      ? "rgba(255, 255, 255, 0.98)"
+      : "rgba(255, 255, 255, 0.15)"
+  };
+  color: ${({ active }) => (active ? "#1b5e20" : "white")};
+  border: 1px solid ${({ active }) =>
+    active
+      ? "#4caf50"
+      : "rgba(255, 255, 255, 0.2)"
+  };
+  border-radius: 15px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(20px);
+  white-space: nowrap;
+  min-width: fit-content;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.98);
+    color: #1b5e20;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(45, 125, 50, 0.2);
+    border-color: #4caf50;
+  }
+
+  @media (max-width: 768px) {
+    padding: 12px 20px;
+    font-size: 13px;
   }
 `;
 
 export const TableContainer = styled.div`
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    h2 {
+      margin: 0;
+      color: #000200;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .table-actions {
+      span {
+        color: #000200;
+        font-size: 14px;
+        padding: 8px 16px;
+        background: #e8f5e8;
+        border-radius: 20px;
+        font-weight: 500;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 20px;
+    
+    .table-header {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+
+      h2 {
+        font-size: 20px;
+      }
+    }
+  }
+`;
+
+export const ResponsiveTable = styled.div`
   overflow-x: auto;
-  margin-bottom: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f8e9;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #a5d6a7;
+    border-radius: 4px;
+  }
 `;
 
 export const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  
-  thead {
-    background-color: #f5f5f5;
-    
-    th {
-      padding: 12px 15px;
-      text-align: left;
-      font-weight: 600;
-      color: #444;
-      border-bottom: 2px solid #ddd;
+  min-width: 1200px;
+
+  th {
+    background: linear-gradient(135deg, #4caf50);
+    color: white;
+    padding: 18px 15px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    &:first-child {
+      border-top-left-radius: 12px;
+    }
+
+    &:last-child {
+      border-top-right-radius: 12px;
     }
   }
-  
-  tbody {
-    tr {
-      border-bottom: 1px solid #eee;
-      
-      &:hover {
-        background-color: #f9f9f9;
+
+  td {
+    padding: 18px 15px;
+    font-size: 14px;
+    border-bottom: 1px solid #e8f5e8;
+    transition: background-color 0.2s ease;
+    color: #1b5e20;
+
+    .badge-number {
+      background: linear-gradient(135deg, #2d7d32, #4caf50);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  }
+
+  tbody tr {
+    &:hover {
+      background: #f1f8e9;
+      cursor: pointer;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    min-width: auto;
+    
+    thead {
+      display: none;
+    }
+
+    tbody tr {
+      display: block;
+      border: 1px solid #e8f5e8;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      padding: 15px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #e8f5e8;
+
+      &:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #1b5e20;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+      }
+
+      &:last-child {
+        border-bottom: none;
       }
     }
-    
-    td {
-      padding: 12px 15px;
-      color: #555;
-    }
+  }
+`;
+
+export const StatusBadge = styled.span<{ status: string }>`
+  background: ${({ status }) =>
+    status === "Enviado"
+      ? "linear-gradient(135deg, #2d7d32, #4caf50)"
+      : status === "Pendente"
+        ? "linear-gradient(135deg, #f57c00, #ff9800)"
+        : "linear-gradient(135deg, #616161, #757575)"};
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+`;
+
+export const FormContainer = styled.div`
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 500px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+`;
+
+export const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+
+  label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1b5e20;
   }
 `;
 
 export const Input = styled.input`
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 14px 18px;
+  border: 2px solid #e8f5e8;
+  border-radius: 12px;
   font-size: 14px;
-  
+  background: white;
+  color: #1b5e20;
+  transition: all 0.3s ease;
+
   &:focus {
     outline: none;
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    border-color: #4caf50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  }
+
+  &:hover {
+    border-color: #4caf50;
+  }
+
+  &::placeholder {
+    color: #81c784;
   }
 `;
 
-export const FormActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 15px;
-  border-top: 1px solid #eee;
+export const Button = styled.button`
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #2d7d32, #4caf50);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(45, 125, 50, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(45, 125, 50, 0.4);
+    background: linear-gradient(135deg, #1b5e20, #388e3c);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  &.secondary {
+    background: linear-gradient(135deg, #757575, #9e9e9e);
+    box-shadow: 0 4px 15px rgba(117, 117, 117, 0.3);
+
+    &:hover {
+      box-shadow: 0 6px 20px rgba(117, 117, 117, 0.4);
+      background: linear-gradient(135deg, #616161, #757575);
+    }
+  }
 `;
 
-export const Button = styled.button<{ secondary?: boolean }>`
-  padding: 10px 20px;
-  border-radius: 4px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+export const Card = styled.div`
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(45, 125, 50, 0.15);
+    border-color: #a5d6a7;
+  }
+`;
+
+export const ProductCard = styled(Card)`
   
-  ${({ secondary }) => secondary ? `
-    background-color: #f5f5f5;
-    color: #555;
-    
-    &:hover {
-      background-color: #e9e9e9;
+  .product-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+
+    .product-icon {
+      font-size: 32px;
+      padding: 12px;
+      background: linear-gradient(135deg, #2d7d32, #4caf50);
+      border-radius: 12px;
+      color: white;
     }
-  ` : `
-    background-color: #4a90e2;
-    color: white;
-    
-    &:hover {
-      background-color: #3a7bc8;
+
+    .product-code {
+      background: #e8f5e8;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1b5e20;
     }
-  `}
+  }
+
+  h3 {
+    margin: 0 0 15px 0;
+    color: #1b5e20;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+ .product-details {
+  margin: 15px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #388e3c;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #1b5e20;
+  font-weight: 500;
+}
+
+ .product-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+@media (max-width: 480px) {
+  .product-details {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.product-description-container {
+  margin: 10px 0;
+}
+
+.product-description {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.4;
+  transition: all 0.3s ease;
+}
+
+.product-description.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-description.expanded {
+  display: block;
+}
+
+.toggle-description-btn {
+  background: none;
+  border: none;
+  color: #1b5e20;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.toggle-description-btn:hover {
+  text-decoration: underline;
+}
+
+.chevron {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.chevron.down {
+  transform: rotate(0deg);
+}
+
+.chevron.up {
+  transform: rotate(180deg);
+}
+
+  
+`;
+
+
+
+
+
+export const DepartmentCard = styled(Card)`
+  .department-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+
+    .department-icon {
+      font-size: 32px;
+      padding: 12px;
+      background: linear-gradient(135deg, #2d7d32, #4caf50);
+      border-radius: 12px;
+      color: white;
+    }
+
+    .department-title {
+      flex: 1;
+
+      h3 {
+        margin: 0;
+        color: #1b5e20;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .department-branch {
+        font-size: 12px;
+        color: #388e3c;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .department-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px;
+      background: #f1f8e9;
+      border-radius: 12px;
+
+      .stat-icon {
+        font-size: 24px;
+      }
+
+      .stat-value {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1b5e20;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: #388e3c;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .department-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+.department-products {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    
+    h4 {
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #555;
+    }
+    
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 10px 0;
+      
+      li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 0;
+        border-bottom: 1px dashed #eee;
+      }
+    }
+    
+    select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+  }
+/* Container principal */
+.linked-products-container {
+  margin-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 15px;
+}
+
+/* Cabeçalho */
+.linked-products-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.linked-products-header h4 {
+  margin: 0;
+  color: #1b5e20;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.count-badge {
+  background: #e8f5e9;
+  color: #1b5e20;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Lista de produtos */
+.linked-products-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+/* Item de produto */
+.linked-product-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  gap: 8px;
+}
+
+.linked-product-item:hover {
+  background: #f1f8e9;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Informações principais */
+.product-main-info {
+  flex: 1;
+  min-width: 0; /* Isso é crucial para evitar cortes */
+  padding-right: 10px; /* Espaço entre o texto e os valores */
+}
+
+/* Informações superiores */
+.product-top-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 4px;
+}
+/* Seção inferior */
+.product-bottom-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.product-name {
+  font-weight: 600;
+  color: #333;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+}
+
+.product-code {
+  font-size: 15px;
+  color:#1b5e20;
+  margin-bottom: 7px;
+ font-weight: bold
+}
+
+/* Valores */
+.product-values {
+  display: flex;
+  gap: 15px;
+  margin: 0 15px;
+}
+
+.value-item {
+  text-align: right;
+}
+
+.value-label {
+  display: block;
+  font-size: 11px;
+  color: #666;
+}
+
+.value-amount {
+  display: flex;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1b5e20;
+    justify-content: space-around;
+}
+
+/* Botão de remover */
+.remove-button {
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.remove-button:hover {
+  transform: scale(1.1);
+  background: #ffebee;
+}
+
+/* Mensagem sem produtos */
+.no-products-message {
+  text-align: center;
+  padding: 15px;
+  color: #666;
+  font-size: 14px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+/* Ícone de lixeira (se estiver usando SVG) */
+.trash-icon {
+  width: 16px;
+  height: 16px;
+  color: #d32f2f;
+}
+/* Container da descrição */
+.product-description-container {
+  position: relative;
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* Estilo da descrição */
+.product-description {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.4;
+  transition: all 0.3s ease;
+}
+
+/* Descrição recolhida */
+.product-description.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Descrição expandida */
+.product-description.expanded {
+  display: block;
+}
+
+/* Botão para expandir/recolher */
+.toggle-description-btn {
+  background: none;
+  border: none;
+  color: #1b5e20;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.toggle-description-btn:hover {
+  text-decoration: underline;
+}
+
+/* Ícone do botão */
+.chevron {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.chevron.down {
+  transform: rotate(0deg);
+}
+
+.chevron.up {
+  transform: rotate(180deg);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .linked-product-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .product-values {
+    margin: 10px 0 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .remove-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-values {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .value-item {
+    text-align: left;
+  }
+}
+
+
+  ` ;
+
+export const IconButton = styled.button`
+  padding: 8px;
+  background: #f1f8e9;
+  border: 1px solid #c8e6c9;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  color: #388e3c;
+
+  &:hover {
+    background: #e8f5e8;
+    transform: scale(1.05);
+    border-color: #4caf50;
+  }
+
+  &.danger {
+    &:hover {
+      background: #ffebee;
+      border-color: #ef5350;
+      color: #d32f2f;
+    }
+  }
+`;
+
+export const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+`;
+
+export const ModalContent = styled.div`
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 2px solid #e8f5e8;
+`;
+
+export const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 25px 0 25px;
+
+  h2 {
+    margin: 0;
+    color: #1b5e20;
+    font-size: 22px;
+    font-weight: 700;
+  }
+`;
+
+export const ModalBody = styled.div`
+  padding: 25px;
+`;
+
+export const ModalFooter = styled.div`
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  padding: 0 25px 25px 25px;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+  }
+`;
+
+export const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #388e3c;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #e8f5e8;
+    color: #1b5e20;
+  }
 `;
 
 export const EmptyState = styled.div`
   text-align: center;
-  padding: 40px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  color: #666;
-  margin: 20px 0;
+  padding: 60px 20px;
+  color: #388e3c;
+
+  .empty-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+  }
+
+  h3 {
+    margin: 0 0 10px 0;
+    color: #1b5e20;
+    font-size: 20px;
+  }
+
+  p {
+    margin: 0 0 30px 0;
+    font-size: 14px;
+  }
 `;
 
 export const LoadingSpinner = styled.div`
@@ -149,55 +1158,254 @@ export const LoadingSpinner = styled.div`
   justify-content: center;
   align-items: center;
   height: 200px;
-  font-size: 18px;
-  color: #666;
-`;
 
-export const ProductsSection = styled.div`
-  margin: 30px 0;
-  padding: 20px;
-  background: #f9f9f9;
-  border-radius: 8px;
+  &::after {
+    content: "";
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
 
-  h3 {
-    margin-bottom: 15px;
-    color: #333;
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 `;
 
-export const ProductsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 15px;
+export const FloatingActionButton = styled.button`
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2d7d32, #4caf50);
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(45, 125, 50, 0.4);
+  transition: all 0.3s ease;
+  z-index: 100;
+  display: none;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(45, 125, 50, 0.5);
+    background: linear-gradient(135deg, #1b5e20, #388e3c);
+  }
+
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 `;
 
-export const ProductCard = styled.div`
-  padding: 15px;
-  background: white;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+export const ProductSelectionModal = styled(Modal)`
+  /* Herda tudo do Modal base */
+`;
+
+export const ProductSelectionContent = styled(ModalContent)`
+  /* Herda do ModalContent base */
+  max-width: 700px;
+`;
+
+export const ProductGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+`;
+
+export const ProductSelectionCard = styled.div<{ selected: boolean }>`
+  position: relative;
+  border: 2px solid ${({ selected }) => (selected ? '#4CAF50' : '#e0e0e0')};
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: ${({ selected }) => (selected ? '#f8fff8' : 'white')};
+  overflow: hidden;
   
-  .product-code {
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+    border-color: ${({ selected }) => (selected ? '#4CAF50' : '#a5d6a7')};
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+    opacity: ${({ selected }) => (selected ? '1' : '0')};
+    transition: opacity 0.3s;
+  }
+`;
+
+export const ProductIcon = styled.div<{ selected: boolean }>`
+  font-size: 28px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${({ selected }) =>
+    selected
+      ? 'linear-gradient(135deg, #2d7d32, #4CAF50)'
+      : 'linear-gradient(135deg, #e8f5e9, #c8e6c9)'};
+  color: ${({ selected }) => (selected ? 'white' : '#388e3c')};
+  border-radius: 12px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  transform: ${({ selected }) => (selected ? 'scale(1.1)' : 'scale(1)')};
+`;
+
+export const ProductInfo = styled.div`
+  h3 {
+    margin: 0 0 5px 0;
+    color: #1b5e20;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 3px 0;
     font-size: 12px;
     color: #666;
-    margin-bottom: 5px;
+  }
+`;
+
+export const SelectionIndicator = styled.div<{ selected: boolean }>`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${({ selected }) => (selected ? '#4CAF50' : '#e0e0e0')};
+  color: white;
+  transition: all 0.3s ease;
+
+  &::after {
+    content: '${({ selected }) => (selected ? '✓' : '+')}';
+    font-weight: bold;
+  }
+`;
+
+export const ConfettiEffect = styled.div<{ selected: boolean }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="1" fill="%234CAF50"/></svg>');
+  background-size: 10px 10px;
+  opacity: ${({ selected }) => (selected ? '1' : '0')};
+  transition: opacity 0.3s;
+  pointer-events: none;
+`;
+
+
+export const ProductSelectionFooter = styled(ModalFooter)`
+  border-top: 1px solid #e8f5e9;
+  padding: 20px 25px;
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .selected-count {
+    font-size: 14px;
+    color: #1b5e20;
+    font-weight: 600;
+    
+    span {
+      background: #e8f5e9;
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin-left: 5px;
+    }
+  }
+
+  
+
+`
+/*
+export const Input_P1 = styled.input`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+`;
+*/
+
+export const ProductsList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+export const ProductItem = styled.li`
+  display: grid;
+  grid-template-columns: 80px 1fr 80px 100px 120px;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  .product-code {
+    font-weight: bold;
+    color: #333;
   }
   
   .product-name {
-    font-weight: 600;
-    margin-bottom: 8px;
+    color: #666;
   }
   
-  .product-description {
-    font-size: 14px;
-    color: #555;
-    margin-bottom: 10px;
+  .product-quantity,
+  .product-unit-value,
+  .product-total-value {
+    text-align: right;
+    font-family: monospace;
   }
   
-  .product-values {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    color: #444;
+  .product-total-value {
+    font-weight: bold;
+    color: #2c5aa0;
   }
+
+  
 `;
+
+
+
+
+
+
+
+
+
+
+
