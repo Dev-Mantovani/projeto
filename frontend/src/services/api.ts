@@ -58,6 +58,11 @@ export const dashboardApi = {
     const { data } = await api.post("/dados-consolidados", payload);
     return data;
   },
+                      //PAGE 2 //
+ updateDadoConsolidado: async (id: number, payload: any) => {
+    const { data } = await api.put(`/dados-consolidados/${id}`, payload);
+    return data;
+  },
 
   
   // ---- Produtos ----
@@ -117,10 +122,14 @@ getProdutosPorDepartamento: async (departamentoId: number) => {
     return data;
   }
 
-  ///-------------------------------- PAGE 2------------------------------- // 
+ ///-------------------------------- PAGE 2------------------------------- // 
+
+ 
 
 };
 
+ 
+ 
 
 
 

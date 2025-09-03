@@ -77,6 +77,7 @@ const Dashboard: React.FC = () => {
     totalFiliais: 0,
     totalServentes: 0,
     previstoTotal: 0,
+    totalServentesRealizado:0,
     realizadoTotal: 0
   });
 
@@ -97,19 +98,25 @@ const Dashboard: React.FC = () => {
     tipo_departamento: "",
     competencia: "",
     numero_serventes: "",
-    previsto_total_ctr: ""
+    previsto_total_ctr: "",
+    realizado_total: "",
+    realizado_per_capita: "",
+    servente_realizado: ""
+
 
   });
   // Função para calcular métricas com base nos dados
   const calcularMetricas = (dados: any[]) => {
     const filiaisUnicas = [...new Set(dados.map(item => item.filial || item.cadastro_filial))];
     const totalServentes = dados.reduce((acc, item) => acc + (Number(item.numero_serventes) || 0), 0);
+    const totalServentesRealizado = dados.reduce((acc, item) => acc + (Number(item.servente_realizado) || 0), 0);
     const previstoTotal = dados.reduce((acc, item) => acc + (Number(item.previsto_total_ctr) || 0), 0);
-    const realizadoTotal = dados.reduce((acc, item) => acc + (Number(item.acumulado_total) || 0), 0);
+    const realizadoTotal = dados.reduce((acc, item) => acc + (Number(item.realizado_total) || 0), 0);
 
     return {
       totalFiliais: filiaisUnicas.length,
       totalServentes,
+      totalServentesRealizado,
       previstoTotal,
       realizadoTotal
     };
@@ -141,7 +148,11 @@ const Dashboard: React.FC = () => {
         return {
           ...item,
           numero_serventes: departamento?.numero_serventes || item.numero_serventes,
-          previsto_total_ctr: departamento?.previsto_total_ctr || item.previsto_total_ctr
+          previsto_total_ctr: departamento?.previsto_total_ctr || item.previsto_total_ctr,
+          realizado_total: departamento!.realizado_total ||  item.realizado_total,
+          servente_realizado: departamento!.servente_realizado ||  item.servente_realizado,
+          realizado_per_capita: departamento!.realizado_per_capita ||   item.realizado_per_capita
+
         };
       });
 
@@ -151,7 +162,6 @@ const Dashboard: React.FC = () => {
         dadosFinais = departamentosList.map((dept: any) => ({
           filial: dept.cadastro_filial,
           data_base: 0,
-          servente_realizado: 0,
           competencia: dept.competencia,
           cadastro_filial: dept.cadastro_filial,
           cadastro_departamento: dept.cadastro_departamento,
@@ -159,8 +169,9 @@ const Dashboard: React.FC = () => {
           numero_serventes: dept.numero_serventes,
           previsto_total_ctr: dept.previsto_total_ctr,
           previsto_per_capita: dept.numero_serventes > 0 ? (Number(dept.previsto_total_ctr) / Number(dept.numero_serventes)) : 0,
-          realizado_per_capita: 0,
-          acumulado_total: 0,
+          realizado_total: dept.realizado_total,
+          servente_realizado: dept.servente_realizado,
+          realizado_per_capita: dept.servente_realizado > 0 ? (Number(dept.realizado_total) / Number(dept.servente_realizado)) : 0,
           diferenca: -Number(dept.previsto_total_ctr || 0),
           variacao: -100,
           status: "Pendente"
@@ -314,7 +325,10 @@ const Dashboard: React.FC = () => {
         tipo_departamento: departamentoForm.tipo_departamento,
         competencia: departamentoForm.competencia,
         numero_serventes: Number(departamentoForm.numero_serventes),
-        previsto_total_ctr: Number(departamentoForm.previsto_total_ctr)
+        previsto_total_ctr: Number(departamentoForm.previsto_total_ctr),
+        realizado_total: Number (departamentoForm.realizado_total),
+        realizado_per_capita: Number(departamentoForm.realizado_per_capita),
+        servente_realizado: Number(departamentoForm.servente_realizado)
       };
 
       if (editandoId) {
@@ -332,7 +346,10 @@ const Dashboard: React.FC = () => {
         tipo_departamento: "",
         competencia: "",
         numero_serventes: "",
-        previsto_total_ctr: ""
+        previsto_total_ctr: "",
+        realizado_total: "",
+        realizado_per_capita: "",
+        servente_realizado: ""
       });
       setEditandoId(null);
       setShowDepartamentoModal(false);
@@ -387,11 +404,12 @@ const Dashboard: React.FC = () => {
       Competencia: item.competencia,
       'Data Base': item.data_base ? `R$ ${Number(item.data_base).toFixed(2)}` : '',
       'Nº Serventes': item.numero_serventes,
+      'Nº Serventes Realizado': item.servente_realizado,
       'Previsto Per Capita': item.previsto_per_capita ? `R$ ${Number(item.previsto_per_capita).toFixed(2)}` : '',
       'Previsto Total CTR': item.previsto_total_ctr ? `R$ ${Number(item.previsto_total_ctr).toFixed(2)}` : '',
-      'Servente Realizado': item.servente_realizado ? `R$ ${Number(item.servente_realizado).toFixed(2)}` : '',
       'Realizado Per Capita': item.realizado_per_capita ? `R$ ${Number(item.realizado_per_capita).toFixed(2)}` : '',
-      'Acumulado Total': item.acumulado_total ? `R$ ${Number(item.acumulado_total).toFixed(2)}` : '',
+      'Realizado Total': item.realizado_total ? `R$ ${Number(item.realizado_total).toFixed(2)}` : '',
+      
       Diferença: item.diferenca ? `R$ ${Number(item.diferenca).toFixed(2)}` : '',
       'Variação (%)': item.variacao ? `${Number(item.variacao).toFixed(2)}%` : '',
       Status: item.status
@@ -571,6 +589,13 @@ const Dashboard: React.FC = () => {
           <div>
             <h3>{metricas.totalServentes}</h3>
             <p>Total Serventes</p>
+          </div>
+        </MetricCard>
+         <MetricCard>
+          <div className="metric-icon">👥</div>
+          <div>
+            <h3>{metricas.totalServentesRealizado}</h3>
+            <p>Servente Realizado</p>
           </div>
         </MetricCard>
         <MetricCard>
@@ -775,8 +800,8 @@ const Dashboard: React.FC = () => {
                       <td data-label="Realizado Per Capita" style={{ color: 'red' }}>
                         R$ {Number(row.realizado_per_capita || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
-                      <td data-label="Acumulado Total" style={{ color: 'red' }}>
-                        R$ {Number(row.acumulado_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      <td data-label="Realizado Total" style={{ color: 'red' }}>
+                        R$ {Number(row.realizado_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
                       <td data-label="Diferença" style={{
                         color: Number(row.diferenca) >= 0 ? "#e74c3c" : "#27ae60",
@@ -925,7 +950,10 @@ const Dashboard: React.FC = () => {
                       tipo_departamento: departamento.tipo_departamento,
                       competencia: departamento.competencia,
                       numero_serventes: departamento.numero_serventes,
-                      previsto_total_ctr: departamento.previsto_total_ctr
+                      previsto_total_ctr: departamento.previsto_total_ctr,
+                      realizado_total: departamento.realizado_total,
+                      realizado_per_capita: departamento.realizado_per_capita,
+                      servente_realizado: departamento.servente_realizado
                     });
                     setEditandoId(departamento.id);
                     setShowDepartamentoModal(true);
@@ -1132,7 +1160,10 @@ const Dashboard: React.FC = () => {
             tipo_departamento: "",
             competencia: "",
             numero_serventes: "",
-            previsto_total_ctr: ""
+            previsto_total_ctr: "",
+            realizado_total: "",
+            realizado_per_capita: "",
+            servente_realizado: ""
 
           });
         }}>
@@ -1192,6 +1223,36 @@ const Dashboard: React.FC = () => {
                   step="0.01"
                   value={departamentoForm.previsto_total_ctr}
                   onChange={(e) => setDepartamentoForm({ ...departamentoForm, previsto_total_ctr: e.target.value })}
+                  placeholder="Digite o valor previsto"
+                />
+              </FormGroup>
+               <FormGroup>
+                <label>Realizado Total *</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={departamentoForm.realizado_total}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm,realizado_total: e.target.value })}
+                  placeholder="Digite o valor previsto"
+                />
+              </FormGroup>
+                <FormGroup>
+                <label>Realizado per Capita *</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={departamentoForm.realizado_per_capita}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm,realizado_per_capita: e.target.value })}
+                  placeholder="Digite o valor previsto"
+                />
+              </FormGroup>
+                <FormGroup>
+                <label>Servente Realizado *</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={departamentoForm.servente_realizado}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm,servente_realizado: e.target.value })}
                   placeholder="Digite o valor previsto"
                 />
               </FormGroup>
@@ -1288,7 +1349,10 @@ const Dashboard: React.FC = () => {
               tipo_departamento: "",
               competencia: "",
               numero_serventes: "",
-              previsto_total_ctr: ""
+              previsto_total_ctr: "",
+              realizado_total: "",
+              realizado_per_capita: "",
+              servente_realizado: ""
             });
             setEditandoId(null);
             setShowDepartamentoModal(true);

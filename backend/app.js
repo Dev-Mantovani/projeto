@@ -63,8 +63,9 @@ app.get("/dados-consolidados", async (req, res) => {
 
 // POST
 app.post("/dados-consolidados", async (req, res) => {
-  const { cadastro_filial, previsto_per_capita, numero_serventes, previsto_total_ctr, realizado_per_capita, acumulado_total, diferenca, variacao, status } = req.body;
-  const { data, error } = await supabase.from("dados_consolidados").insert([{ cadastro_filial, previsto_per_capita, numero_serventes, previsto_total_ctr, realizado_per_capita, acumulado_total, diferenca, variacao, status }]).single();
+  const { cadastro_filial, previsto_per_capita, numero_serventes, previsto_total_ctr, realizado_per_capita, servente_realizado, realizado_total, diferenca, variacao, status } = req.body;
+  const { data, error } = await supabase.from("dados_consolidados").insert([{ cadastro_filial, previsto_per_capita, numero_serventes, previsto_total_ctr, realizado_per_capita, servente_realizado, realizado_total
+, diferenca, variacao, status }]).single();
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json(data);
 });
@@ -118,8 +119,10 @@ app.delete("/produtos/:id", async (req, res) => {
 
 // Rota para cadastrar departamento
 app.post("/departamentos", async (req, res) => {
-  const { cadastro_filial, cadastro_departamento,tipo_departamento, competencia, numero_serventes, previsto_total_ctr } = req.body;
-  const { data, error } = await supabase.from("departamentos").insert([{ cadastro_filial, cadastro_departamento,tipo_departamento, competencia, numero_serventes, previsto_total_ctr }]).single();
+  const { cadastro_filial, cadastro_departamento,tipo_departamento, competencia, numero_serventes, previsto_total_ctr, realizado_total,realizado_per_capita, servente_realizado
+ } = req.body;
+  const { data, error } = await supabase.from("departamentos").insert([{ cadastro_filial, cadastro_departamento,tipo_departamento, competencia, numero_serventes, previsto_total_ctr, realizado_total,realizado_per_capita, servente_realizado
+ }]).single();
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json(data);
 });
@@ -137,11 +140,13 @@ app.get("/departamentos", async (req, res) => {
 // Rota para Update no Departamento
 app.put("/departamentos/:id", async (req, res) => {
   const { id } = req.params;
-  const { cadastro_filial, cadastro_departamento, numero_serventes,tipo_departamento, competencia, previsto_total_ctr } = req.body;
+  const { cadastro_filial, cadastro_departamento, numero_serventes,tipo_departamento, competencia, previsto_total_ctr, realizado_total,realizado_per_capita, servente_realizado
+ } = req.body;
   
   const { data, error } = await supabase
     .from("departamentos")
-    .update({ cadastro_filial, cadastro_departamento,tipo_departamento, competencia, numero_serventes, previsto_total_ctr })
+    .update({ cadastro_filial, cadastro_departamento,tipo_departamento, competencia, numero_serventes, previsto_total_ctr, realizado_total,realizado_per_capita, servente_realizado
+ })
     .eq("id", id)
     .single();
 

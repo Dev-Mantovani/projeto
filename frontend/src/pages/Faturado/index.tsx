@@ -40,7 +40,7 @@ interface Produto {
   departamento_id?: number;
 }
 
-const Dashboard: React.FC = () => {
+const RelatorioPage: React.FC = () => {
   // Estados
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -450,4 +450,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default RelatorioPage;
