@@ -116,7 +116,6 @@ app.delete("/produtos/:id", async (req, res) => {
 
 // -------------------- Departamento --------------------
 
-
 // Rota para cadastrar departamento
 app.post("/departamentos", async (req, res) => {
   const { cadastro_filial, cadastro_departamento,tipo_departamento, competencia, numero_serventes, previsto_total_ctr, realizado_total,realizado_per_capita, servente_realizado
@@ -165,6 +164,8 @@ app.delete("/departamentos/:id", async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
+
+
 
 // ================== PRODUTOS POR DEPARTAMENTO ==================
 

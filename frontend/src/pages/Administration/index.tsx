@@ -37,7 +37,25 @@ import {
   ProductIcon,
   ProductInfo,
   SelectionIndicator,
-  ProductSelectionFooter
+  ProductSelectionFooter,
+  ProductItem,
+  ProductsActions,
+  ProductsBadge,
+  ProductsHeader,
+  ProductsInfo,
+  ProductsList,
+  ProductsSection,
+  ProductsTitle,
+  LinkedProductItem,
+  LinkedProductsContainer,
+  LinkedProductsTitle,
+  EmptyBadge,
+  EmptyProductsMessage,
+  ExpandIcon,
+  ExpandableContainer,
+  AddProductButton,
+  ToggleButton
+  
 } from "./styles";
 
 import { dashboardApi } from "../../services/api";
@@ -55,6 +73,7 @@ const Dashboard: React.FC = () => {
   const [produtosDisponiveis, setProdutosDisponiveis] = useState<any[]>([]);
   const [produtosSelecionados, setProdutosSelecionados] = useState<number[]>([]);
   const [produtosPorDepartamento, setProdutosPorDepartamento] = useState<{ [key: number]: any[] }>({});
+  const [departamentosExpandidos, setDepartamentosExpandidos] = useState<{ [key: number]: boolean }>({});
 
 
 
@@ -299,7 +318,7 @@ const Dashboard: React.FC = () => {
 
 
   // --------------Cadastrar Departamento------------------
-  const salvarDepartamento = async () => {
+ const salvarDepartamento = async () => {
     const camposObrigatorios = [
       departamentoForm.cadastro_filial,
       departamentoForm.cadastro_departamento,
@@ -323,7 +342,7 @@ const Dashboard: React.FC = () => {
         competencia: departamentoForm.competencia,
         numero_serventes: Number(departamentoForm.numero_serventes),
         previsto_total_ctr: Number(departamentoForm.previsto_total_ctr),
-        realizado_total: Number(departamentoForm.realizado_total),
+        realizado_total: Number (departamentoForm.realizado_total),
         realizado_per_capita: Number(departamentoForm.realizado_per_capita),
         servente_realizado: Number(departamentoForm.servente_realizado)
       };
@@ -359,6 +378,8 @@ const Dashboard: React.FC = () => {
     }
   };
 
+
+
   // Função para excluir departamento
   const excluirDepartamento = async (id: number) => {
     if (!confirm("Tem certeza que deseja excluir este departamento?")) return;
@@ -375,6 +396,8 @@ const Dashboard: React.FC = () => {
       setLoading(false);
     }
   };
+
+
 
 
 
@@ -542,6 +565,16 @@ const Dashboard: React.FC = () => {
       return newState;
     });
   };
+
+  // 2. Adicione esta função para alternar a expansão
+  const toggleDepartamentoExpansao = (departamentoId: number) => {
+    setDepartamentosExpandidos(prev => ({
+      ...prev,
+      [departamentoId]: !prev[departamentoId]
+    }));
+  };
+
+
 
 
   if (loading && tabelaData.length === 0) {
@@ -929,6 +962,20 @@ const Dashboard: React.FC = () => {
                     <div className="stat-label">Previsto CTR</div>
                   </div>
                 </div>
+                <div className="stat">
+                  <div className="stat-icon">📅</div> {/* Mudei o ícone para calendário */}
+                  <div>
+                    <div className="stat-value">
+                      {(() => {
+                        const data = new Date(departamento.competencia);
+                        const mes = String(data.getMonth() + 2).padStart(2, "0");
+                        const ano = data.getFullYear();
+                        return `${mes}/${ano}`;
+                      })()}
+                    </div>
+                    <div className="stat-label">Competência</div> {/* Mudei o label */}
+                  </div>
+                </div>
               </div>
               <div className="department-actions">
                 <IconButton
@@ -959,80 +1006,128 @@ const Dashboard: React.FC = () => {
                   🗑️
                 </IconButton>
               </div>
-              <div className="department-products">
-                <div className="products-header">
-                  <h4>Produtos Associados</h4>
-                  <Button
-                    onClick={() => {
-                      setDepartamentoParaAdicionar(departamento.id);
-                      setProdutosSelecionados([]);
-                      setShowAdicionarProdutoModal(true);
-                    }}
+              <ProductsSection>
+                <ProductsHeader hasProducts={produtosPorDepartamento[departamento.id]?.length > 0}>
+                  <ProductsInfo
+                    clickable={produtosPorDepartamento[departamento.id]?.length > 0}
+                    onClick={() => produtosPorDepartamento[departamento.id]?.length > 0 && toggleDepartamentoExpansao(departamento.id)}
                   >
-                    ➕ Adicionar Produtos
-                  </Button>
-                </div>
+                    {produtosPorDepartamento[departamento.id]?.length > 0 && (
+                      <ExpandIcon expanded={departamentosExpandidos[departamento.id]}>
+                        ▶
+                      </ExpandIcon>
+                    )}
 
-                {produtosPorDepartamento[departamento.id]?.length > 0 ? (
-                  <div className="linked-products-container">
-                    <div className="linked-products-header">
-                      <h4>📦 Produtos Vinculados</h4>
-                      <span className="count-badge">{produtosPorDepartamento[departamento.id].length} itens</span>
-                    </div>
-                    <ul className="linked-products-list">
-                      {produtosPorDepartamento[departamento.id].map(produto => (
-                        <li key={produto.id} className="linked-product-item">
-                          <div className="product-top-info">
-                            <span className="product-code">{produto.codigo}</span>
-                            <span className="product-name">{produto.descricao}</span>
-                            <div className="product-description-container">
-                              <div className={`product-description ${produto.showFullDescription ? 'expanded' : 'collapsed'}`}>
-                                {produto.descricao_ctr}
+                    <ProductsTitle>
+                      📦 Produtos Associados
+                    </ProductsTitle>
+
+                    {produtosPorDepartamento[departamento.id]?.length > 0 ? (
+                      <ProductsBadge>
+                        {produtosPorDepartamento[departamento.id].length}
+                      </ProductsBadge>
+                    ) : (
+                      <EmptyBadge>(0 itens)</EmptyBadge>
+                    )}
+                  </ProductsInfo>
+
+                  <ProductsActions>
+                    {produtosPorDepartamento[departamento.id]?.length > 0 && (
+                      <ToggleButton
+                        expanded={departamentosExpandidos[departamento.id]}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleDepartamentoExpansao(departamento.id);
+                        }}
+                      >
+                        {departamentosExpandidos[departamento.id] ? '👁️ Ocultar' : '👁️ Mostrar'}
+                      </ToggleButton>
+                    )}
+
+                    <AddProductButton
+                      onClick={() => {
+                        setDepartamentoParaAdicionar(departamento.id);
+                        setProdutosSelecionados([]);
+                        setShowAdicionarProdutoModal(true);
+                      }}
+                    >
+                      ➕ Adicionar
+                    </AddProductButton>
+                  </ProductsActions>
+                </ProductsHeader>
+
+                <ExpandableContainer expanded={departamentosExpandidos[departamento.id]}>
+                  {produtosPorDepartamento[departamento.id]?.length > 0 ? (
+                    <LinkedProductsContainer>
+                      <LinkedProductsTitle>
+                        📦 Produtos Vinculados
+                      </LinkedProductsTitle>
+
+                      <ProductsList>
+                        {produtosPorDepartamento[departamento.id].map((produto, index) => (
+                          <ProductItem
+                            key={produto.id}
+                            index={index}
+                            expanded={departamentosExpandidos[departamento.id]}
+                          >
+                            <LinkedProductItem>
+                              <div className="product-top-info">
+                                <span className="product-code">{produto.codigo}</span>
+                                <span className="product-name">{produto.descricao}</span>
+                                <div className="product-description-container">
+                                  <div className={`product-description ${produto.showFullDescription ? 'expanded' : 'collapsed'}`}>
+                                    {produto.descricao_ctr}
+                                  </div>
+                                  {produto.descricao_ctr?.length > 100 && (
+                                    <button
+                                      className="toggle-description-btn"
+                                      onClick={() => toggleDescription(departamento.id, produto.id)}
+                                    >
+                                      {produto.showFullDescription ? 'Mostrar menos' : 'Mostrar mais'}
+                                      <span className={`chevron ${produto.showFullDescription ? 'up' : 'down'}`}>▼</span>
+                                    </button>
+                                  )}
+                                </div>
                               </div>
-                              {produto.descricao_ctr?.length > 100 && (
-                                <button
-                                  className="toggle-description-btn"
-                                  onClick={() => toggleDescription(departamento.id, produto.id)}
+                              <div className="product-bottom-section">
+                                <div className="product-values">
+                                  <div className="value-item">
+                                    <span className="value-label">Quantidade:</span>
+                                    <span className="value-amount">{produto.produto_quantidade}</span>
+                                  </div>
+                                  <div className="value-item">
+                                    <span className="value-label">Unitário:</span>
+                                    <span className="value-amount">
+                                      {produto.valor_unitario ? `R$ ${Number(produto.valor_unitario).toFixed(2)}` : 'R$ 0,00'}
+                                    </span>
+                                  </div>
+                                  <div className="value-item">
+                                    <span className="value-label">Total:</span>
+                                    <span className="value-amount">
+                                      {produto.valor_total ? `R$ ${Number(produto.valor_total).toFixed(2)}` : 'R$ 0,00'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <IconButton
+                                  className="danger remove-button"
+                                  onClick={() => removerProdutoDepartamento(departamento.id, produto.id)}
+                                  title="Remover produto"
                                 >
-                                  {produto.showFullDescription ? 'Mostrar menos' : 'Mostrar mais'}
-                                  <span className={`chevron ${produto.showFullDescription ? 'up' : 'down'}`}>▼</span>
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                          <div className="product-bottom-section">
-                            <div className="product-values">
-                              <div className="value-item">
-                                <span className="value-label">Quantidade:</span>
-                                <span className="value-amount">{produto.produto_quantidade} </span>
+                                  🗑️
+                                </IconButton>
                               </div>
-                              <div className="value-item">
-                                <span className="value-label">Unitário:</span>
-                                <span className="value-amount">{produto.valor_unitario ? `R$ ${Number(produto.valor_unitario).toFixed(2)}` : 'R$ 0,00'}</span>
-                              </div>
-                              <div className="value-item">
-                                <span className="value-label">Total:</span>
-                                <span className="value-amount">{produto.valor_total ? `R$ ${Number(produto.valor_total).toFixed(2)}` : 'R$ 0,00'}</span>
-                              </div>
-                            </div>
-                            <IconButton
-                              className="danger remove-button"
-                              onClick={() => removerProdutoDepartamento(departamento.id, produto.id)}
-                              title="Remover produto"
-                            >
-                              🗑️
-                            </IconButton>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : (
-                  <div className="no-products-message">
-                    <span>Nenhum produto vinculado</span>
-                  </div>
-                )}
-              </div>
+                            </LinkedProductItem>
+                          </ProductItem>
+                        ))}
+                      </ProductsList>
+                    </LinkedProductsContainer>
+                  ) : (
+                    <EmptyProductsMessage>
+                      Nenhum produto vinculado a este departamento
+                    </EmptyProductsMessage>
+                  )}
+                </ExpandableContainer>
+              </ProductsSection>
 
             </DepartmentCard>
           ))}
@@ -1188,15 +1283,14 @@ const Dashboard: React.FC = () => {
                 />
               </FormGroup>
               <FormGroup>
-                <label>Competencia *</label>
+                <label>Competência *</label>
                 <Input
                   value={departamentoForm.competencia}
                   onChange={(e) => setDepartamentoForm({ ...departamentoForm, competencia: e.target.value })}
-                  placeholder="Competencia"
+                  placeholder="Selecione mês/ano"
                   type="date"
                 />
               </FormGroup>
-
               <FormGroup>
                 <label>Número de Serventes *</label>
                 <Input

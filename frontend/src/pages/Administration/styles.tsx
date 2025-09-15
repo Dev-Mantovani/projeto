@@ -1348,12 +1348,199 @@ export const ProductSelectionFooter = styled(ModalFooter)`
     }
   }
 
+  
 
   
 
 `;
 
+export const ProductsSection = styled.div`
+  margin-top: 15px;
+`;
 
+export const ProductsHeader = styled.div<{ hasProducts: boolean }>`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: ${props => props.hasProducts ? '1px solid #eee' : 'none'};
+  transition: all 0.3s ease;
+`;
+
+export const ProductsInfo = styled.div<{ clickable: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: ${props => props.clickable ? 'pointer' : 'default'};
+  user-select: none;
+  
+  &:hover {
+    opacity: ${props => props.clickable ? '0.8' : '1'};
+  }
+`;
+
+export const ExpandIcon = styled.span<{ expanded: boolean }>`
+  transform: ${props => props.expanded ? 'rotate(90deg)' : 'rotate(0deg)'};
+  transition: transform 0.3s ease;
+  font-size: 12px;
+  color: #666;
+  display: inline-block;
+`;
+
+export const ProductsTitle = styled.h4`
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+`;
+
+export const ProductsBadge = styled.span`
+  background-color: #007bff;
+  color: white;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+
+`;
+
+export const EmptyBadge = styled.span`
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
+`;
+
+export const ProductsActions = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+export const ToggleButton = styled.button<{ expanded: boolean }>`
+  background: ${props => props.expanded ? '#f8f9fa' : '#e9ecef'};
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #495057;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #dee2e6;
+    border-color: #ced4da;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
+
+export const AddProductButton = styled(Button)`
+  font-size: 11px !important;
+  padding: 6px 10px !important;
+  background-color: #28a745 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+
+  &:hover {
+    background-color: #218838 !important;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+export const ExpandableContainer = styled.div<{ expanded: boolean }>`
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.3s ease, 
+              padding 0.3s ease;
+  max-height: ${props => props.expanded ? '2000px' : '0px'};
+  opacity: ${props => props.expanded ? 1 : 0};
+  padding-top: ${props => props.expanded ? '10px' : '0px'};
+`;
+
+export const ProductsList = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
+
+export const ProductItem = styled.li<{ index: number; expanded: boolean }>`
+  animation: ${props => props.expanded ? 
+    `fadeInUp 0.4s ease ${props.index * 0.1}s forwards` : 'none'};
+  opacity: ${props => props.expanded ? 0 : 1};
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+export const EmptyProductsMessage = styled.div`
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-size: 14px;
+  font-style: italic;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px dashed #dee2e6;
+`;
+
+// Componente para o container dos produtos vinculados
+export const LinkedProductsContainer = styled.div`
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  border: 1px solid #e9ecef;
+`;
+
+export const LinkedProductsTitle = styled.h4`
+  margin: 0 0 10px 0;
+  color: #495057;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+// Para o item de produto individual
+export const LinkedProductItem = styled.li`
+  background: white;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
 
 
 

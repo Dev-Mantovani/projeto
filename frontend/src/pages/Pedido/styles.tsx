@@ -163,3 +163,56 @@ export const InfoValue = styled.span`
   color: #6b7280;
   font-size: 0.875rem;
 `;
+
+
+// ... outros estilos existentes ...
+
+export const CardContainer = styled.div`
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+export const CardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #e8e8e8;
+  }
+`;
+
+export const CardContent = styled.div`
+  padding: 15px;
+  background-color: #fff;
+`;
+
+export const CardRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+`;
+
+export const CardLabel = styled.span`
+  font-weight: bold;
+  color: #555;
+`;
+
+export const CardValue = styled.span`
+  color: #333;
+`;
+
+export const CardCompetencia = styled.div`
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  min-width: 250px;
+  background-color: #f9f9f9;
+`;
