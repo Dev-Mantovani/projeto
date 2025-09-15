@@ -77,7 +77,7 @@ const Dashboard: React.FC = () => {
     totalFiliais: 0,
     totalServentes: 0,
     previstoTotal: 0,
-    totalServentesRealizado:0,
+    totalServentesRealizado: 0,
     realizadoTotal: 0
   });
 
@@ -149,9 +149,9 @@ const Dashboard: React.FC = () => {
           ...item,
           numero_serventes: departamento?.numero_serventes || item.numero_serventes,
           previsto_total_ctr: departamento?.previsto_total_ctr || item.previsto_total_ctr,
-          realizado_total: departamento!.realizado_total ||  item.realizado_total,
-          servente_realizado: departamento!.servente_realizado ||  item.servente_realizado,
-          realizado_per_capita: departamento!.realizado_per_capita ||   item.realizado_per_capita
+          realizado_total: departamento!.realizado_total || item.realizado_total,
+          servente_realizado: departamento!.servente_realizado || item.servente_realizado,
+          realizado_per_capita: departamento!.realizado_per_capita || item.realizado_per_capita
 
         };
       });
@@ -172,8 +172,8 @@ const Dashboard: React.FC = () => {
           realizado_total: dept.realizado_total,
           servente_realizado: dept.servente_realizado,
           realizado_per_capita: dept.servente_realizado > 0 ? (Number(dept.realizado_total) / Number(dept.servente_realizado)) : 0,
-          diferenca: -Number(dept.previsto_total_ctr || 0),
-          variacao: -100,
+          diferenca: Number(dept.previsto_total_ctr) - (Number(dept.realizado_total) || 0),
+          variacao: ((Number(dept.realizado_total) || 0) / Number(dept.previsto_total_ctr) - 1) * 100,
           status: "Pendente"
         }));
       }
@@ -232,11 +232,7 @@ const Dashboard: React.FC = () => {
 
       return periodoMatch && filialMatch && departamentoMatch && statusMatch && tipoMatch && competenciaMatch && searchMatch;
 
-
-
-
     });
-
 
 
   };
@@ -283,6 +279,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
+
   // Função para excluir produto
   const excluirProduto = async (id: number) => {
     if (!confirm("Tem certeza que deseja excluir este produto?")) return;
@@ -326,7 +323,7 @@ const Dashboard: React.FC = () => {
         competencia: departamentoForm.competencia,
         numero_serventes: Number(departamentoForm.numero_serventes),
         previsto_total_ctr: Number(departamentoForm.previsto_total_ctr),
-        realizado_total: Number (departamentoForm.realizado_total),
+        realizado_total: Number(departamentoForm.realizado_total),
         realizado_per_capita: Number(departamentoForm.realizado_per_capita),
         servente_realizado: Number(departamentoForm.servente_realizado)
       };
@@ -409,7 +406,7 @@ const Dashboard: React.FC = () => {
       'Previsto Total CTR': item.previsto_total_ctr ? `R$ ${Number(item.previsto_total_ctr).toFixed(2)}` : '',
       'Realizado Per Capita': item.realizado_per_capita ? `R$ ${Number(item.realizado_per_capita).toFixed(2)}` : '',
       'Realizado Total': item.realizado_total ? `R$ ${Number(item.realizado_total).toFixed(2)}` : '',
-      
+
       Diferença: item.diferenca ? `R$ ${Number(item.diferenca).toFixed(2)}` : '',
       'Variação (%)': item.variacao ? `${Number(item.variacao).toFixed(2)}%` : '',
       Status: item.status
@@ -446,11 +443,7 @@ const Dashboard: React.FC = () => {
     try {
       const produtos = await dashboardApi.getProdutos();
       // Adiciona a propriedade showFullDescription a cada produto
-      const produtosComEstado = produtos.map(produto => ({
-        ...produto,
-        showFullDescription: false // Valor inicial
-      }));
-      setProdutosDisponiveis(produtosComEstado || []);
+
     } catch (error) {
       console.error("Erro ao carregar produtos disponíveis:", error);
       setProdutosDisponiveis([]);
@@ -466,6 +459,8 @@ const Dashboard: React.FC = () => {
 
     carregarTodosDados();
   }, []);
+
+
 
   // PRODUTO X DEPARTAMENTO//
 
@@ -549,7 +544,6 @@ const Dashboard: React.FC = () => {
   };
 
 
-
   if (loading && tabelaData.length === 0) {
     return (
       <Container>
@@ -588,21 +582,21 @@ const Dashboard: React.FC = () => {
           <div className="metric-icon">👥</div>
           <div>
             <h3>{metricas.totalServentes}</h3>
-            <p>Total Serventes</p>
+            <p>Serventes em CTR</p>
           </div>
         </MetricCard>
-         <MetricCard>
+        <MetricCard>
           <div className="metric-icon">👥</div>
           <div>
             <h3>{metricas.totalServentesRealizado}</h3>
-            <p>Servente Realizado</p>
+            <p>Serventes Ativos</p>
           </div>
         </MetricCard>
         <MetricCard>
           <div className="metric-icon">📊</div>
           <div>
             <h3>R$ {metricas.previstoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
-            <p>Previsto Total</p>
+            <p>Previsto em CTR</p>
           </div>
         </MetricCard>
         <MetricCard>
@@ -747,7 +741,6 @@ const Dashboard: React.FC = () => {
                     <th>Filial</th>
                     <th>Departamento</th>
                     <th>Tipo</th>
-                    <th>Data Base</th>
                     <th>Nº Serventes</th>
                     <th>Previsto per Capita</th>
                     <th>Previsto Total CTR</th>
@@ -766,7 +759,7 @@ const Dashboard: React.FC = () => {
                         <strong>
                           {(() => {
                             const data = new Date(row.competencia);
-                            const mes = String(data.getMonth() + 1).padStart(2, "0");
+                            const mes = String(data.getMonth() + 2).padStart(2, "0");
                             const ano = data.getFullYear();
                             return `${mes}/${ano}`;
                           })()}
@@ -780,9 +773,6 @@ const Dashboard: React.FC = () => {
                       <td data-label="Tipo">
                         <strong>{row.tipo || row.tipo_departamento}</strong>
                       </td>
-                      <td data-label="Data Base" style={{ color: 'red' }}>
-                        R$ {Number(row.data_base || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </td>
                       <td data-label="Nº Serventes">
                         <span className="badge-number">{row.numero_serventes}</span>
                       </td>
@@ -794,7 +784,7 @@ const Dashboard: React.FC = () => {
                       </td>
 
                       <td data-label="Servente Realizado" style={{ color: 'red' }}>
-                        R$ {Number(row.servente_realizado || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        <span className="badge-number2">{row.servente_realizado}</span>
                       </td>
 
                       <td data-label="Realizado Per Capita" style={{ color: 'red' }}>
@@ -804,7 +794,7 @@ const Dashboard: React.FC = () => {
                         R$ {Number(row.realizado_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
                       <td data-label="Diferença" style={{
-                        color: Number(row.diferenca) >= 0 ? "#e74c3c" : "#27ae60",
+                        color: Number(row.diferenca) >= 0 ? "#27ae60" : "#e74c3c",
                         fontWeight: "bold"
                       }}>
                         {Number(row.diferenca) >= 0 ? "+" : ""}R$ {Number(row.diferenca || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -1226,33 +1216,33 @@ const Dashboard: React.FC = () => {
                   placeholder="Digite o valor previsto"
                 />
               </FormGroup>
-               <FormGroup>
+              <FormGroup>
                 <label>Realizado Total *</label>
                 <Input
                   type="number"
                   step="0.01"
                   value={departamentoForm.realizado_total}
-                  onChange={(e) => setDepartamentoForm({ ...departamentoForm,realizado_total: e.target.value })}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm, realizado_total: e.target.value })}
                   placeholder="Digite o valor previsto"
                 />
               </FormGroup>
-                <FormGroup>
+              <FormGroup>
                 <label>Realizado per Capita *</label>
                 <Input
                   type="number"
                   step="0.01"
                   value={departamentoForm.realizado_per_capita}
-                  onChange={(e) => setDepartamentoForm({ ...departamentoForm,realizado_per_capita: e.target.value })}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm, realizado_per_capita: e.target.value })}
                   placeholder="Digite o valor previsto"
                 />
               </FormGroup>
-                <FormGroup>
+              <FormGroup>
                 <label>Servente Realizado *</label>
                 <Input
                   type="number"
                   step="0.01"
                   value={departamentoForm.servente_realizado}
-                  onChange={(e) => setDepartamentoForm({ ...departamentoForm,servente_realizado: e.target.value })}
+                  onChange={(e) => setDepartamentoForm({ ...departamentoForm, servente_realizado: e.target.value })}
                   placeholder="Digite o valor previsto"
                 />
               </FormGroup>

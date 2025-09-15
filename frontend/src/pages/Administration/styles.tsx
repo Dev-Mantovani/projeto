@@ -376,6 +376,16 @@ export const Table = styled.table`
       font-size: 12px;
       font-weight: 600;
     }
+
+    
+    .badge-number2 {
+      background: linear-gradient(135deg, #d82b2b, #af4c4c);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
   }
 
   tbody tr {

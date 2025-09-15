@@ -134,6 +134,7 @@ const RelatorioPage: React.FC = () => {
 
   // Atualizar produto em tempo real
   const atualizarProdutoLocal = (produtoId: number, campo: string, valor: number) => {
+
     const novosProdutos = produtos.map(produto => {
       if (produto.id === produtoId) {
         const produtoAtualizado = { ...produto, [campo]: valor };
@@ -158,31 +159,13 @@ const RelatorioPage: React.FC = () => {
       setEditandoProduto(null);
       // Recarregar dados para atualizar o acumulado_total no departamento
       await carregarDados();
-    } catch (error) {
+    } 
+    
+    catch (error) {
       console.error("Erro ao salvar produto:", error);
     }
   };
 
-  // Adicionar novo produto
-  const adicionarProduto = async (departamentoId: number) => {
-    try {
-      const novoProduto = {
-        codigo: "NOVO",
-        descricao: "Novo Produto",
-        descricao_ctr: "Novo Produto CTR",
-        produto_quantidade: 1,
-        valor_unitario: 0,
-        valor_total: 0,
-        departamento_id: departamentoId
-      };
-
-      const produtoCriado = await dashboardApi.createProduto(novoProduto);
-      setProdutos([...produtos, produtoCriado]);
-      await carregarDados(); // Recarregar para atualizar acumulado_total
-    } catch (error) {
-      console.error("Erro ao adicionar produto:", error);
-    }
-  };
 
   // Exportar para Excel
   const exportarExcel = () => {
@@ -347,7 +330,17 @@ const RelatorioPage: React.FC = () => {
                             </span>
                           )}
                         </td>
-                        <td>{depto.competencia}</td>
+                           <td data-label="Competencia">
+                        <strong>
+                          {(() => {
+                            const data = new Date(depto.competencia);
+                            const mes = String(data.getMonth() + 2).padStart(2, "0");
+                            const ano = data.getFullYear();
+                            return `${mes}/${ano}`;
+                          })()}
+                        </strong>
+
+                      </td>
                         <td><strong>{depto.cadastro_filial}</strong></td>
                         <td><strong>{depto.cadastro_departamento}</strong></td>
                         <td>{depto.numero_serventes || 0}</td>

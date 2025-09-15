@@ -4,8 +4,8 @@ import ListUsers from './pages/ListUsers'
 import Funcionarios from './pages/Funcionarios'
 import Login from './pages/Acess'
 import Dashboard from './pages/Administration'
-import Pedido_Faturado from './pages/Faturado'
 import RelatorioPage from './pages/Faturado'
+import PedidoPage from './pages/Pedido'
 
 
 const router = createBrowserRouter([
@@ -49,6 +49,15 @@ const router = createBrowserRouter([
 
 
     },
+
+    {
+        path: '/pedido',
+        element: <PedidoPage/>
+
+
+    },
+
+
 
 
 
