@@ -332,41 +332,18 @@ export const ResponsiveTable = styled.div`
     background: #a5d6a7;
     border-radius: 4px;
   }
-
-  
- .subtitulo-container {
-   
-
-  }
-
-  .orçado_desc {
-    background: linear-gradient(135deg, #4c4a4a, #6b6b6b);
-  
-  }
-
-  .realizado_desc {
-    background: linear-gradient(135deg, #1417ce, #3b3dff);
-
-  }
-
-  .comparativo_desc {
-    background: linear-gradient(135deg, #2d7d32, #4caf50);
-
-  }
 `;
-
 
 export const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   min-width: 1200px;
 
-
   th {
     background: linear-gradient(135deg, #060606);
     color: white;
     padding: 18px 15px;
-    text-align: center;
+    text-align: left;
     font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
@@ -376,7 +353,7 @@ export const Table = styled.table`
     z-index: 10;
 
     &:first-child {
-      
+      border-top-left-radius: 12px;
     }
 
     &:last-child {
@@ -384,52 +361,7 @@ export const Table = styled.table`
     }
   }
 
-  .th2 {
-    background: linear-gradient(135deg, #1417ce);
-    color: white;
-    padding: 18px 15px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-
-    &:first-child {
-      border-top-left-radius: 12px;
-    }
-
-    &:last-child {
-      border-top-right-radius: 12px;
-    }
-
-
-    }
-
-    .th3 {
-    background: linear-gradient(135deg, #2d7d32);
-    color: white;
-    padding: 18px 15px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-
-    &:first-child {
-      border-top-left-radius: 12px;
-    }
-
-    &:last-child {
-      border-top-right-radius: 12px;
-    }
-
-    }
+  
 
   td {
     padding: 18px 15px;
@@ -1116,7 +1048,6 @@ export const DepartmentCard = styled(Card)`
 }
 
 
-
   ` ;
 
 export const IconButton = styled.button`
@@ -1521,12 +1452,6 @@ export const ToggleButton = styled.button<{ expanded: boolean }>`
   }
 `;
 
-
-
-
-
-
-
 export const AddProductButton = styled(Button)`
   font-size: 11px !important;
   padding: 6px 10px !important;
@@ -1626,11 +1551,8 @@ export const LinkedProductItem = styled.li`
     margin-bottom: 0;
   }
 
-  
  
 `;
-
-
 
 
 
