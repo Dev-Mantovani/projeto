@@ -65,6 +65,20 @@ export const Input = styled.input`
   padding: 0.5rem;
   border-radius: 0.25rem;
   width: 120px;
+  font-size: 14px;
+  
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+  
+  /* Estilos específicos para campos inline */
+  &[style*="width: 100px"] {
+    width: 100px !important;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
 `;
 
 export const SaveButton = styled.button`
@@ -164,9 +178,6 @@ export const InfoValue = styled.span`
   font-size: 0.875rem;
 `;
 
-
-// ... outros estilos existentes ...
-
 export const CardContainer = styled.div`
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -217,7 +228,6 @@ export const CardCompetencia = styled.div`
   background-color: #f9f9f9;
 `;
 
-// Adicione estas definições no seu arquivo styles.ts
 export const FilterContainer = styled.div`
   display: flex;
   gap: 20px;
@@ -251,7 +261,6 @@ export const FilterLabel = styled.label`
   color: #333;
 `;
 
-// Adicione estas definições no seu arquivo styles.ts
 export const StatusPendente = styled.span`
   background-color: #ff9800;
   color: white;
@@ -277,4 +286,75 @@ export const StatusEnviado = styled.span`
   border-radius: 12px;
   font-size: 12px;
   font-weight: bold;
+`;
+
+export const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+  div {
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      color: black;
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    p {
+      margin: 5px 0 0 0;
+      color: black;
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+
+    div h1 {
+      font-size: 24px;
+    }
+  }
+`;
+
+export const SearchBar = styled.div`
+  input {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    width: 300px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    font-size: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 4px 20px rgba(45, 125, 50, 0.3);
+      transform: translateY(-2px);
+      border: 2px solid #4caf50;
+    }
+
+    &::placeholder {
+      color: #666;
+    }
+  }
+
+  @media (max-width: 768px) {
+    input {
+      width: 100%;
+      max-width: 300px;
+    }
+  }
 `;

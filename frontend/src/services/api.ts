@@ -120,11 +120,15 @@ getProdutosPorDepartamento: async (departamentoId: number) => {
   removerProdutoDoDepartamento: async (departamentoId: number, produtoId: number) => {
     const { data } = await api.delete(`/departamentos/${departamentoId}/produtos/${produtoId}`);
     return data;
-  }
+  },
 
  ///-------------------------------- PAGE 2------------------------------- // 
 
- 
+// Adicione este método no seu dashboardApi
+  bloquearDepartamento: async (id: number) => {
+  const { data } = await api.put(`/departamentos/${id}/bloquear`);
+  return data;
+},
 
 };
 

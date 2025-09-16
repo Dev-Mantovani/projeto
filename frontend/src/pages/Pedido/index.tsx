@@ -1,6 +1,7 @@
 // src/pages/Departamentos/index.tsx
 import { useEffect, useState } from "react";
 import { dashboardApi } from "../../services/api";
+import { getStatusDepartamento } from "../../utils/statusUtils"; // Importa a função centralizada
 import {
   Container,
   Title,
@@ -104,49 +105,30 @@ const PedidoPage: React.FC = () => {
     if (!competencia) return "";
 
     try {
-   const data = new Date(competencia); // transforma string em Date
-    const mes = String(data.getMonth() + 2).padStart(2, "0"); // mês sempre com 2 dígitos
-    const ano = data.getFullYear();
+      const data = new Date(competencia); // transforma string em Date
+      const mes = String(data.getMonth() + 2).padStart(2, "0"); // mês sempre com 2 dígitos
+      const ano = data.getFullYear();
       return `${mes}/${ano}`;
     } catch {
       return competencia;
     }
   };
 
-  // Função para determinar o status do departamento
-  const getStatusDepartamento = (dep: Departamento): string => {
-    const { servente_realizado, realizado_per_capita, realizado_total } = dep;
-    
-    // Verifica se todos os campos são zero ou nulos
-    const todosZeros = [servente_realizado, realizado_per_capita, realizado_total].every(
-      valor => valor === 0 || valor === null || valor === undefined
-    );
-    
-    if (todosZeros) {
-      return "pendente";
-    }
-    
-    // Verifica se algum campo obrigatório é zero
-    const algumZero = [servente_realizado, realizado_per_capita, realizado_total].some(
-      valor => valor === 0 || valor === null || valor === undefined
-    );
-    
-    if (algumZero) {
-      return "inconsistencia";
-    }
-    
-    return "enviado";
-  };
-
   // Função para obter o status do grupo (baseado nas competências)
   const getStatusGrupo = (grupo: GrupoDepartamento): string => {
-    const statusCompetencias = grupo.competencias.map(comp => getStatusDepartamento(comp));
+    const statusCompetencias = grupo.competencias.map(comp => 
+      getStatusDepartamento({
+        servente_realizado: comp.servente_realizado,
+        realizado_per_capita: comp.realizado_per_capita,
+        realizado_total: comp.realizado_total
+      })
+    );
     
-    if (statusCompetencias.every(status => status === "enviado")) {
+    if (statusCompetencias.every(status => status === "Enviado")) {
       return "enviado";
     }
     
-    if (statusCompetencias.some(status => status === "inconsistencia")) {
+    if (statusCompetencias.some(status => status === "Inconsistência")) {
       return "inconsistencia";
     }
     
@@ -155,10 +137,11 @@ const PedidoPage: React.FC = () => {
 
   // Componente para exibir o status com estilo
   const renderStatus = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case "pendente":
         return <StatusPendente>Pendente</StatusPendente>;
       case "inconsistencia":
+      case "inconsistência":
         return <StatusInconsistencia>Inconsistência</StatusInconsistencia>;
       case "enviado":
         return <StatusEnviado>Enviado</StatusEnviado>;
@@ -226,6 +209,8 @@ const PedidoPage: React.FC = () => {
     }
   };
 
+// Aplicar função de edição
+
   const handleEdit = (dep: Departamento) => {
     setEditId(dep.id);
     setEditValues({
@@ -234,6 +219,8 @@ const PedidoPage: React.FC = () => {
       totalrealizado: Number(dep.realizado_total) || 0
     });
   };
+
+// Aplicar função de Cancelar
 
   const handleCancel = () => {
     setEditId(null);
@@ -247,7 +234,7 @@ const PedidoPage: React.FC = () => {
       editValues.totalrealizado,
     ];
 
-    if (camposObrigatorios.some(campo => campo === null || campo === undefined || campo === 0)) {
+    if (camposObrigatorios.some(campo => campo === null || campo === undefined )) {
       alert("Preencha todos os campos obrigatórios");
       return;
     }
@@ -342,7 +329,7 @@ const PedidoPage: React.FC = () => {
               <TableHeader>Departamento</TableHeader>
               <TableHeader>Filial</TableHeader>
               <TableHeader>Quantidade de Competências</TableHeader>
-              <TableHeader>Ações</TableHeader>
+              <TableHeader>Status</TableHeader>
             </TableRow>
           </thead>
           <tbody>
@@ -395,7 +382,13 @@ const PedidoPage: React.FC = () => {
                             </thead>
                             <tbody>
                               {grupo.competencias.map((competencia) => {
-                                const statusCompetencia = getStatusDepartamento(competencia);
+                                // Usa a função centralizada para calcular o status
+                                const statusCompetencia = getStatusDepartamento({
+                                  servente_realizado: competencia.servente_realizado,
+                                  realizado_per_capita: competencia.realizado_per_capita,
+                                  realizado_total: competencia.realizado_total
+                                });
+                                
                                 return (
                                   <tr key={competencia.id}>
                                     <td style={{ padding: "8px" }}>
@@ -424,6 +417,7 @@ const PedidoPage: React.FC = () => {
                                       )}
                                     </td>
                                     <td style={{ padding: "8px" }}>
+                                      {/* Agora usa o status calculado pela função centralizada */}
                                       {renderStatus(statusCompetencia)}
                                     </td>
                                     <td style={{ padding: "8px" }}>

@@ -332,18 +332,63 @@ export const ResponsiveTable = styled.div`
     background: #a5d6a7;
     border-radius: 4px;
   }
+
+  
+ .subtitulo-container {
+   
+
+  }
+
+  .orçado_desc {
+    background: linear-gradient(135deg, #4c4a4a, #6b6b6b);
+  
+  }
+
+  .realizado_desc {
+    background: linear-gradient(135deg, #1417ce, #3b3dff);
+
+  }
+
+  .comparativo_desc {
+    background: linear-gradient(135deg, #2d7d32, #4caf50);
+
+  }
 `;
+
 
 export const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   min-width: 1200px;
 
+
   th {
-    background: linear-gradient(135deg, #4caf50);
+    background: linear-gradient(135deg, #060606);
     color: white;
     padding: 18px 15px;
-    text-align: left;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    &:first-child {
+      
+    }
+
+    &:last-child {
+      border-top-right-radius: 12px;
+    }
+  }
+
+  .th2 {
+    background: linear-gradient(135deg, #1417ce);
+    color: white;
+    padding: 18px 15px;
+    text-align: center;
     font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
@@ -359,33 +404,66 @@ export const Table = styled.table`
     &:last-child {
       border-top-right-radius: 12px;
     }
-  }
+
+
+    }
+
+    .th3 {
+    background: linear-gradient(135deg, #2d7d32);
+    color: white;
+    padding: 18px 15px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    &:first-child {
+      border-top-left-radius: 12px;
+    }
+
+    &:last-child {
+      border-top-right-radius: 12px;
+    }
+
+    }
 
   td {
     padding: 18px 15px;
     font-size: 14px;
     border-bottom: 1px solid #e8f5e8;
     transition: background-color 0.2s ease;
-    color: #1b5e20;
+    color: black;
 
     .badge-number {
+      display: flex;
       background: linear-gradient(135deg, #2d7d32, #4caf50);
       color: white;
-      padding: 6px 12px;
-      border-radius: 20px;
+      padding: 6px 10px;
+      border-radius: 15px;
       font-size: 12px;
       font-weight: 600;
+      justify-content: center;
+      align-items: center;
     }
 
     
     .badge-number2 {
-      background: linear-gradient(135deg, #d82b2b, #af4c4c);
+      display: flex;
+      background: linear-gradient(135deg,#1417ce, #4c4eaf);
       color: white;
-      padding: 6px 12px;
-      border-radius: 20px;
+      padding: 6px 10px;
+      border-radius: 15px;
       font-size: 12px;
       font-weight: 600;
+      justify-content: center;
+      align-items: center;
     }
+    
+
   }
 
   tbody tr {
@@ -445,7 +523,7 @@ export const StatusBadge = styled.span<{ status: string }>`
       ? "linear-gradient(135deg, #2d7d32, #4caf50)"
       : status === "Pendente"
         ? "linear-gradient(135deg, #f57c00, #ff9800)"
-        : "linear-gradient(135deg, #616161, #757575)"};
+        : "linear-gradient(135deg, #ff0000, #ff0000)"};
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
@@ -1038,6 +1116,7 @@ export const DepartmentCard = styled(Card)`
 }
 
 
+
   ` ;
 
 export const IconButton = styled.button`
@@ -1442,6 +1521,12 @@ export const ToggleButton = styled.button<{ expanded: boolean }>`
   }
 `;
 
+
+
+
+
+
+
 export const AddProductButton = styled(Button)`
   font-size: 11px !important;
   padding: 6px 10px !important;
@@ -1540,6 +1625,9 @@ export const LinkedProductItem = styled.li`
   &:last-child {
     margin-bottom: 0;
   }
+
+  
+ 
 `;
 
 
