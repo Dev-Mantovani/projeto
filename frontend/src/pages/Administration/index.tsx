@@ -190,7 +190,7 @@ const Dashboard: React.FC = () => {
           previsto_per_capita: dept.numero_serventes > 0 ? (Number(dept.previsto_total_ctr) / Number(dept.numero_serventes)) : 0,
           realizado_total: dept.realizado_total,
           servente_realizado: dept.servente_realizado,
-          realizado_per_capita: dept.servente_realizado > 0 ? (Number(dept.realizado_total) / Number(dept.servente_realizado)) : 0,
+          realizado_per_capita:dept.realizado_per_capita,
           diferenca: Number(dept.previsto_total_ctr) - (Number(dept.realizado_total) || 0),
           variacao: ((Number(dept.realizado_total) || 0) / Number(dept.previsto_total_ctr) - 1) * 100,
           status: "Pendente"
@@ -654,7 +654,7 @@ const Dashboard: React.FC = () => {
 
             {[...new Set(tabelaData.map(item => item.competencia))].map((competencia) => {
               const data = new Date(competencia); // transforma string em Date
-              const mes = String(data.getMonth() + 1).padStart(2, "0"); // mês sempre com 2 dígitos
+              const mes = String(data.getMonth() + 2).padStart(2, "0"); // mês sempre com 2 dígitos
               const ano = data.getFullYear();
               const competenciaFormatada = `${mes}/${ano}`;
 

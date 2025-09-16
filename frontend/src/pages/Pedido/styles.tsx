@@ -216,3 +216,65 @@ export const CardCompetencia = styled.div`
   min-width: 250px;
   background-color: #f9f9f9;
 `;
+
+// Adicione estas definições no seu arquivo styles.ts
+export const FilterContainer = styled.div`
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  align-items: end;
+`;
+
+export const FilterInput = styled.input`
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 250px;
+`;
+
+export const FilterSelect = styled.select`
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 250px;
+`;
+
+export const FilterLabel = styled.label`
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+`;
+
+// Adicione estas definições no seu arquivo styles.ts
+export const StatusPendente = styled.span`
+  background-color: #ff9800;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+`;
+
+export const StatusInconsistencia = styled.span`
+  background-color: #f44336;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+`;
+
+export const StatusEnviado = styled.span`
+  background-color: #4caf50;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+`;
